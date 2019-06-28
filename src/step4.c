@@ -19,11 +19,13 @@ int main()
 	Init_LED();							//Init LED config
 	Init_TIMER_LED(PERIOD_RESET_LED);	//Init PWM for green LED and blue LED
 	if (Init_IMU()) {					//Init IMU (and I2C in a row)
-		//UART_PutSTR("imu init failed\r\n");
+		UART_PutSTR("imu init failed\r\n");
 	} else {
-		//UART_PutSTR("imu init succeeded\r\n");
+		UART_PutSTR("imu init succeeded\r\n");
 	}
 	Init_PININT();
+	Chip_GPIO_SetPinState(LPC_GPIO,1,11,true);
+
 
 	Chip_TIMER_Enable(LPC_TIMER16_0);	//Enable LED TIMER
 
@@ -34,9 +36,9 @@ int main()
 		tmp = UART_Read_max_nB(1);
 		if (tmp != 10) {
 			function = tmp;
-			//UART_PutSTR("Function set as : ");
-			//UART_PutHEX(function);
-			//UART_PutSTR("\r\n");
+			UART_PutSTR("Function set as : ");
+			UART_PutHEX(function);
+			UART_PutSTR("\r\n");
 		}
 	}
 	return(0);

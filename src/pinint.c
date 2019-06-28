@@ -59,6 +59,4 @@ void PININT_IRQ_HANDLER(void)
 	Set_TIMER_Match(0,per,PERIOD_RESET_LED);
 	//Uncomment for graphic
 	/*print_stuff(per);*/
-	UART_PutCHAR('a');
-	UART_PutSTR("\r\n");
 }

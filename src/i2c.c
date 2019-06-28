@@ -37,6 +37,8 @@ void twi_read_n(uint8_t dev_id, uint8_t reg, int n) {
 		I2CReadLength = n;
 		I2CWrite = 0;
 		I2CStart();
+	} else {
+		UART_PutSTR("i2c déjà occupé\r\n");
 	}
 
 	return;

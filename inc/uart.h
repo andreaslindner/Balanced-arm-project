@@ -10,6 +10,5 @@ void UART_PutHEX(uint32_t hex);				//Send a hex value
 void UART_PutCHAR(char c);					//Send a char value
 void UART_PutSTR(char *str);				//Send a string value
 uint8_t UART_Read_max_nB(uint32_t n);		//Read UART, stop when fifo empty or when n bytes have been read
-void UART_IRQHandler(void);					//UART ISR
 
 #endif /* UART_H_ */
