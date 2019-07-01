@@ -5,7 +5,7 @@
 const uint8_t imu_address = 0x68;
 extern volatile uint16_t values[7];
 
-uint32_t Init_IMU()
+void Init_IMU()
 {
 	//Init AD0, pull down valuesistor
 	LPC_IOCON->PIO1_10  &= ~0x1F;
@@ -14,31 +14,37 @@ uint32_t Init_IMU()
 	//Init i2c bus
 	I2CInit(I2CMASTER);
 
-	//Configuring sample rate divider
-	while (twi_write(imu_address, 0x19, 0x09) != 0);
-	//Configuring gyro range to +-1000deg/s
-	while (twi_write(imu_address, 0x1B, 0x10) != 0);
-	//Configuring acc range to +-8g
-	while (twi_write(imu_address, 0x1C, 0x10) != 0);
-	//Enable data-read interrupt
-	while (twi_write(imu_address, 0x38, 0x01) != 0);
-	//Chose f0 for low filter (here 94Hz)
-	while (twi_write(imu_address, 0x1A, 0x02) != 0);
-	//Config INT pin
-	while (twi_write(imu_address, 0x37, 0x30) != 0);
+	while(I2C_Write_Blocking_1B(imu_address, 0x19, 0x09) == 2) {
+		UART_PutSTR("Timeout on writing into the IMU\r\n");
+	}
+	while(I2C_Write_Blocking_1B(imu_address, 0x1B, 0x10) == 2) {
+		UART_PutSTR("Timeout on writing into the IMU\r\n");
+	}
+	while(I2C_Write_Blocking_1B(imu_address, 0x1C, 0x10) == 2) {
+		UART_PutSTR("Timeout on writing into the IMU\r\n");
+	}
+	while(I2C_Write_Blocking_1B(imu_address, 0x38, 0x01) == 2) {
+		UART_PutSTR("Timeout on writing into the IMU\r\n");
+	}
+	while(I2C_Write_Blocking_1B(imu_address, 0x1A, 0x02) == 2) {
+		UART_PutSTR("Timeout on writing into the IMU\r\n");
+	}
+	while(I2C_Write_Blocking_1B(imu_address, 0x37, 0x30) == 2) {
+		UART_PutSTR("Timeout on writing into the IMU\r\n");
+	}
+	while(I2C_Write_Blocking_1B(imu_address, 0x6B, 0x00) == 2) {
+		UART_PutSTR("Timeout on writing into the IMU\r\n");
+	}
 
-	//UART_PutSTR("imu: wake MPU6050\r\n");
+	UART_PutSTR("imu: wake MPU6050\r\n");
 
-	//Configure power management
-	while(twi_write(imu_address, 0x6B, 0x00 != 0));
-
-	return(0);
+	return;
 }
 
-void imu_read_values()
+void IMU_Read_Values()
 {
 	//Ask for the 14 bytes stocked after register 0x3B
-	twi_read_n(imu_address, 0x3B, 14);
+	I2C_Read_nBlocking(imu_address, 0x3B, 14);
 }
 
 /*

@@ -18,11 +18,8 @@ int main()
 	Init_UART();						//Init UART
 	Init_LED();							//Init LED config
 	Init_TIMER_LED(PERIOD_RESET_LED);	//Init PWM for green LED and blue LED
-	if (Init_IMU()) {					//Init IMU (and I2C in a row)
-		UART_PutSTR("imu init failed\r\n");
-	} else {
-		UART_PutSTR("imu init succeeded\r\n");
-	}
+	Init_IMU();					//Init IMU (and I2C in a row)
+
 	Init_PININT();
 	Chip_GPIO_SetPinState(LPC_GPIO,1,11,true);
 

@@ -11,6 +11,8 @@
 extern const uint8_t imu_address;
 extern volatile uint16_t values[7];
 extern volatile uint8_t function;
+extern volatile uint8_t ask_for_new_value;
+extern volatile uint8_t read_available;
 
 void Init_PININT()
 {
@@ -25,7 +27,7 @@ void Init_PININT()
 	Chip_GPIO_EnableInt(LPC_GPIO, GPIO_PININT_PORT, (1 << GPIO_PININT));
 
 	//Set register as 0
-	twi_read_n(imu_address, 0x3A, 1);
+	IMU_Read_Values();
 
 	// Enable interrupt in the NVIC
 	NVIC_ClearPendingIRQ(PININT_NVIC_NAME);
@@ -33,30 +35,16 @@ void Init_PININT()
 	NVIC_EnableIRQ(PININT_NVIC_NAME);
 }
 
-static uint8_t f(uint8_t x) {
-	return(floor(21 * log(1+x)));
-}
-
-static void print_stuff(uint8_t per)
-{
-	uint8_t i;
-	for (i = 0; i < 100; ++i) {
-		if (i == per) {
-			UART_PutCHAR('+');
-		} else {
-			UART_PutCHAR('.');
-		}
-	}
-	UART_PutSTR("\r\n");
-}
-
 void PININT_IRQ_HANDLER(void)
 {
 	uint8_t per;
 	Chip_GPIO_ClearInts(LPC_GPIO, GPIO_PININT_PORT, (1 << GPIO_PININT));
-	imu_read_values();	//Launch reading imu for new value
+	if (read_available == 1) {
+		IMU_Read_Values();
+	} else { // read_available == 0
+		ask_for_new_value = 1;
+		UART_PutSTR("ask_for_new_value\r\n");
+	}
 	per = mult_per(function, values);
 	Set_TIMER_Match(0,per,PERIOD_RESET_LED);
-	//Uncomment for graphic
-	/*print_stuff(per);*/
 }

@@ -53,11 +53,10 @@ For board to board test, this flag can be turned on. */
 
 extern void I2C_IRQHandler( void );
 extern uint32_t I2CInit( uint32_t I2cMode );
-extern void I2CStart();
 
-void twi_read_n(uint8_t dev_id, uint8_t reg, int n);
-uint8_t twi_write_n(uint8_t dev_id, uint8_t reg, uint8_t* ba, int n);
-uint8_t twi_write(uint8_t dev_id, uint8_t reg, uint8_t b);
+void I2C_Read_nBlocking(uint8_t dev_id, uint8_t reg, int n);
+uint8_t I2C_Write_Blocking(uint8_t dev_id, uint8_t reg, uint8_t* ba, int n);
+uint8_t I2C_Write_Blocking_1B(uint8_t dev_id, uint8_t reg, uint8_t b);
 void I2CDriver();
 
 #endif
