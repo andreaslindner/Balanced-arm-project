@@ -24,11 +24,11 @@ volatile uint8_t I2CWrite = 0;
 
 extern volatile uint16_t values[7];
 
-void twi_read_n(uint8_t dev_id, uint8_t reg, int n) {
+uint8_t twi_read_n(uint8_t dev_id, uint8_t reg, int n) {
 
 	if (I2CMasterState != I2C_BUSY) {
 		if ((n >= BUFSIZE) | (n < 0))
-			return;
+			return 1;
 
 		I2CMasterBuffer[0] = dev_id << 1;
 		I2CMasterBuffer[1] = reg;
@@ -37,11 +37,10 @@ void twi_read_n(uint8_t dev_id, uint8_t reg, int n) {
 		I2CReadLength = n;
 		I2CWrite = 0;
 		I2CStart();
+		return 0;
 	} else {
-		UART_PutSTR("i2c déjà occupé\r\n");
+		return 2;
 	}
-
-	return;
 }
 
 uint8_t twi_write_n(uint8_t dev_id, uint8_t reg, uint8_t* ba, int n) {
