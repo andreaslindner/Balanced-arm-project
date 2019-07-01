@@ -5,8 +5,9 @@
 const uint8_t imu_address = 0x68;
 extern volatile uint16_t values[7];
 
-void Init_IMU()
+uint8_t Init_IMU()
 {
+	uint8_t counter_timeout = 0;
 	//Init AD0, pull down valuesistor
 	LPC_IOCON->PIO1_10  &= ~0x1F;
 	LPC_IOCON->PIO1_10  |= 0x08;
@@ -16,29 +17,57 @@ void Init_IMU()
 
 	while(I2C_Write_Blocking_1B(imu_address, 0x19, 0x09) == 2) {
 		UART_PutSTR("Timeout on writing into the IMU\r\n");
+		counter_timeout++;
+		if (counter_timeout == 2){
+			return 1;
+		}
 	}
 	while(I2C_Write_Blocking_1B(imu_address, 0x1B, 0x10) == 2) {
 		UART_PutSTR("Timeout on writing into the IMU\r\n");
+		counter_timeout++;
+		if (counter_timeout == 2){
+			return 1;
+		}
 	}
 	while(I2C_Write_Blocking_1B(imu_address, 0x1C, 0x10) == 2) {
 		UART_PutSTR("Timeout on writing into the IMU\r\n");
+		counter_timeout++;
+		if (counter_timeout == 2){
+			return 1;
+		}
 	}
 	while(I2C_Write_Blocking_1B(imu_address, 0x38, 0x01) == 2) {
 		UART_PutSTR("Timeout on writing into the IMU\r\n");
+		counter_timeout++;
+		if (counter_timeout == 2){
+			return 1;
+		}
 	}
 	while(I2C_Write_Blocking_1B(imu_address, 0x1A, 0x02) == 2) {
 		UART_PutSTR("Timeout on writing into the IMU\r\n");
+		counter_timeout++;
+		if (counter_timeout == 2){
+			return 1;
+		}
 	}
 	while(I2C_Write_Blocking_1B(imu_address, 0x37, 0x30) == 2) {
 		UART_PutSTR("Timeout on writing into the IMU\r\n");
+		counter_timeout++;
+		if (counter_timeout == 2){
+			return 1;
+		}
 	}
 	while(I2C_Write_Blocking_1B(imu_address, 0x6B, 0x00) == 2) {
 		UART_PutSTR("Timeout on writing into the IMU\r\n");
+		counter_timeout++;
+		if (counter_timeout == 2){
+			return 1;
+		}
 	}
 
 	UART_PutSTR("imu: wake MPU6050\r\n");
 
-	return;
+	return 0;
 }
 
 void IMU_Read_Values()

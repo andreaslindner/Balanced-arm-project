@@ -13,13 +13,15 @@ volatile uint16_t values[7] = {0,0,0,0,0,0,0};
 int main()
 {
 	uint8_t tmp;
+	uint8_t init_system = 1;
 
-	Chip_GPIO_Init(LPC_GPIO);			//Init chip
-	Init_UART();						//Init UART
-	Init_LED();							//Init LED config
-	Init_TIMER_LED(PERIOD_RESET_LED);	//Init PWM for green LED and blue LED
-	Init_IMU();					//Init IMU (and I2C in a row)
-
+	while (init_system) {
+		Chip_GPIO_Init(LPC_GPIO);			//Init chip
+		Init_UART();						//Init UART
+		Init_LED();							//Init LED config
+		Init_TIMER_LED(PERIOD_RESET_LED);	//Init PWM for green LED and blue LED
+		init_system = Init_IMU();			//Init IMU (and I2C in a row)
+	}
 	Init_PININT();
 	Chip_GPIO_SetPinState(LPC_GPIO,1,11,true);
 
