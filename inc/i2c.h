@@ -51,12 +51,12 @@ For board to board test, this flag can be turned on. */
 #define I2SCLH_HS_SCLH		0x00000015  /* Fast Plus I2C SCL Duty Cycle High Reg */
 #define I2SCLL_HS_SCLL		0x00000015  /* Fast Plus I2C SCL Duty Cycle Low Reg */
 
-extern void I2C_IRQHandler( void );
-extern uint32_t I2CInit( uint32_t I2cMode );
+extern void I2C_IRQHandler( void );													// Handler for i2c interrupt
+extern uint32_t I2CInit( uint32_t I2cMode );										// Init i2c bus
 
-void I2C_Read_nBlocking(uint8_t dev_id, uint8_t reg, int n);
-uint8_t I2C_Write_Blocking(uint8_t dev_id, uint8_t reg, uint8_t* ba, int n);
-uint8_t I2C_Write_Blocking_1B(uint8_t dev_id, uint8_t reg, uint8_t b);
-void I2CDriver();
+void I2C_Read_nBlocking(uint8_t dev_id, uint8_t reg, int n);						// Read n bytes from the address reg of the device (dev_id), not blocking reading
+uint8_t I2C_Write_Blocking(uint8_t dev_id, uint8_t reg, uint8_t* ba, int n);		// Write n bytes from the address reg of the device (dev_id), blocking writing
+uint8_t I2C_Write_Blocking_1B(uint8_t dev_id, uint8_t reg, uint8_t b);				// Write 1 byte to the address reg of the device (dev_id), blocking writing
+void I2CDriver();																	// Deals with I2C communication protocol
 
 #endif

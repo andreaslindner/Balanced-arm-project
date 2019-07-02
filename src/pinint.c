@@ -43,7 +43,6 @@ void PININT_IRQ_HANDLER(void)
 		IMU_Read_Values();
 	} else { // read_available == 0
 		ask_for_new_value = 1;
-		UART_PutSTR("ask_for_new_value\r\n");
 	}
 	per = mult_per(function, values);
 	Set_TIMER_Match(0,per,PERIOD_RESET_LED);
