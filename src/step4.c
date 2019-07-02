@@ -23,12 +23,11 @@ int main()
 		init_system = Init_IMU();			//Init IMU (and I2C in a row)
 	}
 	Init_PININT();
-	Chip_GPIO_SetPinState(LPC_GPIO,1,11,true);
+	Init_TIMER();
+	TIMER_Enable();
 
-
-	Chip_TIMER_Enable(LPC_TIMER16_0);	//Enable LED TIMER
-
-	Set_TIMER_Match(1,10,PERIOD_RESET_LED); //Set blue LED to 10% luminosity (better to see contrast in green luminosity)
+	Chip_TIMER_Enable(LPC_TIMER16_0);				//Enable LED TIMER
+	Set_TIMER_Match(1,10,PERIOD_RESET_LED); 		//Set blue LED to 10% luminosity (better to see contrast in green luminosity)
 
 	while(1) {	//main loop -> reading UART
 

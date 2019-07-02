@@ -6,7 +6,9 @@
 #include <imu.h>
 #include <fonction.h>
 #include <led.h>
+#include <timer.h>
 #include <math.h>
+
 
 extern const uint8_t imu_address;
 extern volatile uint16_t values[7];
@@ -38,6 +40,8 @@ void Init_PININT()
 void PININT_IRQ_HANDLER(void)
 {
 	uint8_t per;
+	UART_PutHEX(TIMER_Get_Counter());
+	UART_PutSTR("\r\n");
 	Chip_GPIO_ClearInts(LPC_GPIO, GPIO_PININT_PORT, (1 << GPIO_PININT));
 	if (read_available == 1) {
 		IMU_Read_Values();
