@@ -13,6 +13,7 @@ extern volatile uint16_t values[7];
 extern volatile uint8_t function;
 extern volatile uint8_t ask_for_new_value;
 extern volatile uint8_t read_available;
+/*volatile uint32_t countGraph = 0;*/
 
 void Init_PININT()
 {
@@ -33,6 +34,7 @@ void Init_PININT()
 	NVIC_ClearPendingIRQ(PININT_NVIC_NAME);
 	NVIC_SetPriority(PININT_NVIC_NAME,1);
 	NVIC_EnableIRQ(PININT_NVIC_NAME);
+	/*countGraph = 0;*/
 }
 
 void PININT_IRQ_HANDLER(void)
@@ -45,5 +47,12 @@ void PININT_IRQ_HANDLER(void)
 		ask_for_new_value = 1;
 	}
 	per = mult_per(function, values);
+
+	/*UART_PutINT(countGraph);
+	UART_PutCHAR(',');
+	UART_PutINT(values[5]);
+	UART_PutSTR("\r\n");
+	countGraph++;*/
+
 	Set_TIMER_Match(0,per,PERIOD_RESET_LED);
 }

@@ -1,5 +1,6 @@
 #include <chip.h>
 #include <uart.h>
+#include <stdlib.h>
 
 void Init_UART()
 {
@@ -29,6 +30,14 @@ void UART_PutSTR(char *str)
 	while (*str != '\0') {
 		UART_PutCHAR(*str++);
 	}
+}
+
+void UART_PutINT(uint16_t n)
+{
+	char str[10] = "";
+	int val = (int16_t) n;
+	itoa(val,str,10);
+	UART_PutSTR(str);
 }
 
 void UART_PutHEX(uint32_t hex)

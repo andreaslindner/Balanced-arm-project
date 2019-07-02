@@ -23,8 +23,6 @@ int main()
 		init_system = Init_IMU();			//Init IMU (and I2C in a row)
 	}
 	Init_PININT();
-	Chip_GPIO_SetPinState(LPC_GPIO,1,11,true);
-
 
 	Chip_TIMER_Enable(LPC_TIMER16_0);	//Enable LED TIMER
 
