@@ -25,7 +25,7 @@ volatile uint8_t read_available = 1;
 volatile uint8_t I2CWrite = 0;
 volatile uint32_t timeout = 0;
 
-extern volatile uint16_t values[7];
+extern volatile int16_t values[7];
 volatile uint8_t ask_for_reading_while_busy = 0;
 extern const uint8_t imu_address;
 

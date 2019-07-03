@@ -9,7 +9,7 @@
 #include <math.h>
 
 extern const uint8_t imu_address;
-extern volatile uint16_t values[7];
+extern volatile int16_t values[7];
 extern volatile uint8_t function;
 extern volatile uint8_t ask_for_new_value;
 extern volatile uint8_t read_available;

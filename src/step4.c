@@ -8,7 +8,7 @@
 
 volatile uint8_t function = 1;	//Useful for communication between IMU handler and main
 extern const uint8_t imu_address;
-volatile uint16_t values[7] = {0,0,0,0,0,0,0};
+volatile int16_t values[7] = {0,0,0,0,0,0,0};
 
 int main()
 {

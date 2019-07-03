@@ -3,7 +3,7 @@
 #include <i2c.h>
 
 const uint8_t imu_address = 0x68;
-extern volatile uint16_t values[7];
+extern volatile int16_t values[7];
 
 uint8_t Init_IMU()
 {
@@ -76,12 +76,14 @@ void IMU_Read_Values()
 	I2C_Read_nBlocking(imu_address, 0x3B, 14);
 }
 
+
+
 /*
 IMU (MPU6050)
 --------------
 SCL&SDA
 - PIO0_4/SCL
-- PIO0_5/SDA
+- PIO0_5/SDA5
 AD0&INT
 - PIO1_10/AD6/CT16B1_MAT1
 - PIO1_11/AD7
