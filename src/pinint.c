@@ -54,5 +54,5 @@ void PININT_IRQ_HANDLER(void)
 	UART_PutSTR("\r\n");
 	countGraph++;*/
 
-	Set_TIMER_Match(0,per,PERIOD_RESET_LED);
+	//Set_TIMER_Match(0,per,PERIOD_RESET_LED);
 }

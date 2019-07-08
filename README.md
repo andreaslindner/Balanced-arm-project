@@ -11,3 +11,8 @@
 &rarr; Solution : I re-wrote the I2C Handler and PININT Handler (IMU inteerupt), now if we ask for reading while I2C is still reading from the last ask, a global variable will be set to 1 and at the end of the current I2C read a new read will be started.
 3. [x] Sometimes, the IMU doesn't want to init, we don't succeed in writing to imu registers (write always timeout).  
 &rarr; Solution : While loop, we authorize 2 timeout and then we re-init all the components.
+
+
+## Potential issues
+
+1. [ ] The prescale of the TIMERs acts directly to the motor performance. For example if I set a prescale of : 1 tick of the TIMER is 0.01 ms, with a loop size of 100 ticks -> a motor set to 1% power won't turn. But if I do the same thing with a prescale of : 1 tick is 1 ms, the wheel turns. So it could be interesting to see what prescale we choose : high prescale allows a better range for the motor power but the movement is more jerked.
