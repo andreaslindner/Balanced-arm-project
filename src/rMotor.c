@@ -15,7 +15,7 @@ void Init_rMotor()
 
 	/* Init TIMER used to produce PWM */
 	Chip_TIMER_Init(LPC_TIMER16_0);
-	Chip_TIMER_PrescaleSet(LPC_TIMER16_0, Chip_Clock_GetSystemClockRate()/1000);	//set prescale to have 1 TICK <-> 1000 µs = 1 ms
+	Chip_TIMER_PrescaleSet(LPC_TIMER16_0, Chip_Clock_GetSystemClockRate()/1000);	//set prescale to have 1 TICK <-> 100 µs = 0.1 ms
 	Chip_TIMER_Disable(LPC_TIMER16_0);
 	Chip_TIMER_Reset(LPC_TIMER16_0);
 
@@ -65,7 +65,7 @@ void rMotor_changeDir(uint8_t direction)
 
 		} else {
 			if (direction == BACKWARD) {
-				LPC_TIMER16_0 -> PWMC = 0x02;
+				LPC_TIMER16_0 -> PWMC = 0x01;
 				Chip_IOCON_PinMuxSet(LPC_IOCON, IOCON_PIO0_8, IOCON_FUNC2);
 				Chip_IOCON_PinMuxSet(LPC_IOCON, IOCON_PIO0_9, IOCON_FUNC0);
 

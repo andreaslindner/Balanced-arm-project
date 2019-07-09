@@ -65,7 +65,7 @@ uint8_t Init_IMU()
 		}
 	}
 
-	UART_PutSTR("imu: wake MPU6050\r\n");
+	//UART_PutSTR("imu: wake MPU6050\r\n");
 
 	return 0;
 }

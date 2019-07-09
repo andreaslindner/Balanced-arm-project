@@ -5,15 +5,14 @@
 #include <i2c.h>
 #include <imu.h>
 #include <fonction.h>
-#include <led.h>
 #include <math.h>
+#include <motor.h>
 
 extern const uint8_t imu_address;
 extern volatile int16_t values[7];
 extern volatile uint8_t function;
 extern volatile uint8_t ask_for_new_value;
 extern volatile uint8_t read_available;
-/*volatile uint32_t countGraph = 0;*/
 
 void Init_PININT()
 {
@@ -46,13 +45,10 @@ void PININT_IRQ_HANDLER(void)
 	} else { // read_available == 0
 		ask_for_new_value = 1;
 	}
-	per = mult_per(function, values);
+	if (direction(values)) {
+		Motor_Backward(50);
+	} else {
+		Motor_Forward(50);
+	}
 
-	/*UART_PutINT(countGraph);
-	UART_PutCHAR(',');
-	UART_PutINT(values[5]);
-	UART_PutSTR("\r\n");
-	countGraph++;*/
-
-	//Set_TIMER_Match(0,per,PERIOD_RESET_LED);
 }

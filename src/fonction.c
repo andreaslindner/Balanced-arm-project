@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-uint8_t ax_per(const int16_t values[7])
+uint8_t ax_per(volatile const int16_t values[7])
 {
 	//absolute value
 	uint16_t value = (values[0] < 0) ? -values[0] : values[0];
@@ -14,4 +14,9 @@ uint8_t mult_per(uint8_t number, volatile const int16_t values[7])
 	uint16_t value = (values[number-1] < 0) ? -values[number-1] : values[number-1];
 	//return the per value/maxValue
 	return(value*100/32767);
+}
+
+uint8_t direction(volatile const int16_t values[7])
+{
+	return (values[5] < 0 ? 0 : 1);
 }
