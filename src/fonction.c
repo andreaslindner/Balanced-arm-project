@@ -20,3 +20,15 @@ uint8_t direction(volatile const int16_t values[7])
 {
 	return (values[5] < 0 ? 0 : 1);
 }
+
+float translate(int16_t value, int lastMinValue, int lastMaxValue, int newMinValue, int newMaxValue)
+{
+	int lastRange = lastMaxValue - lastMinValue;
+	int newRange = newMaxValue - newMinValue;
+
+	if (lastRange != 0) {
+		return((float)((value * newRange) / lastRange));
+	} else {
+		return(0);
+	}
+}

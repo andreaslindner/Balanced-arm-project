@@ -84,6 +84,27 @@ void I2C_Read_nBlocking(uint8_t dev_id, uint8_t reg, int n)
 
 }
 
+void I2C_Read_Blocking(uint8_t dev_id, uint8_t reg, int n)
+{
+	if ((n >= BUFSIZE) | (n < 0))
+		return;
+
+	I2CMasterBuffer[0] = dev_id << 1;
+	I2CMasterBuffer[1] = reg;
+	I2CMasterBuffer[2] = dev_id << 1 | 0x01;
+	I2CWriteLength = 2;
+	I2CReadLength = n;
+
+	I2CWrite = 0;
+	I2CMasterState = I2C_BUSY;
+
+	LPC_I2C->CONSET = I2CONSET_STA;
+
+	read_available = 0;
+	while (I2CMasterState == I2C_BUSY);
+
+}
+
 void I2C_IRQHandler(void)
 {
 

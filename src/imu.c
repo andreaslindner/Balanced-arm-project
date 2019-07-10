@@ -22,14 +22,14 @@ uint8_t Init_IMU()
 			return 1;
 		}
 	}
-	while(I2C_Write_Blocking_1B(imu_address, 0x1B, 0x10) == 2) {
+	while(I2C_Write_Blocking_1B(imu_address, 0x1B, 0x08) == 2) {	//Gyro scale range set to +- 500°/s, LSB sensitivity 65.5 LSB/(°/s)
 		UART_PutSTR("Timeout on writing into the IMU\r\n");
 		counter_timeout++;
 		if (counter_timeout == 2){
 			return 1;
 		}
 	}
-	while(I2C_Write_Blocking_1B(imu_address, 0x1C, 0x10) == 2) {
+	while(I2C_Write_Blocking_1B(imu_address, 0x1C, 0x10) == 2) {	//Acc scale range set to +- 8g, LSB sensitivity 4096 LSB/g
 		UART_PutSTR("Timeout on writing into the IMU\r\n");
 		counter_timeout++;
 		if (counter_timeout == 2){
@@ -65,7 +65,7 @@ uint8_t Init_IMU()
 		}
 	}
 
-	//UART_PutSTR("imu: wake MPU6050\r\n");
+	UART_PutSTR("imu: wake MPU6050\r\n");
 
 	return 0;
 }

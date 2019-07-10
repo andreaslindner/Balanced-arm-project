@@ -14,6 +14,11 @@ extern volatile uint8_t function;
 extern volatile uint8_t ask_for_new_value;
 extern volatile uint8_t read_available;
 
+const float sampleTime = 0.0098;
+volatile float previousAngle = 0;
+volatile float errorSum = 0;
+volatile float targetAngle = 0;
+
 void Init_PININT()
 {
 	//Ser pin dir as input
@@ -33,22 +38,47 @@ void Init_PININT()
 	NVIC_ClearPendingIRQ(PININT_NVIC_NAME);
 	NVIC_SetPriority(PININT_NVIC_NAME,1);
 	NVIC_EnableIRQ(PININT_NVIC_NAME);
-	/*countGraph = 0;*/
+}
+
+static void compute_new_angle(float *currentAngle)
+{
+	float accAngle = atan2(values[1],values[2]) * RAD_TO_DEG;
+	float gyroSpeed = translate(values[5], -32768, 32767, -500, 500);
+	float gyroAngle = (float) gyroSpeed * sampleTime;
+	*currentAngle = ALPHA * (previousAngle + gyroAngle) + (1-ALPHA) * accAngle;
 }
 
 void PININT_IRQ_HANDLER(void)
 {
-	uint8_t per;
+	float currentAngle, error, motorPower;
+
+	/* Clear Int */
 	Chip_GPIO_ClearInts(LPC_GPIO, GPIO_PININT_PORT, (1 << GPIO_PININT));
+
+	/* Ask for read a new value of the IMU */
 	if (read_available == 1) {
 		IMU_Read_Values();
 	} else { // read_available == 0
 		ask_for_new_value = 1;
 	}
-	if (direction(values)) {
-		Motor_Backward(50);
-	} else {
-		Motor_Forward(50);
-	}
+
+	/* Calculate the angle */
+	compute_new_angle(&currentAngle);
+
+	/* Calculate the errors */
+	error = currentAngle - targetAngle;
+	errorSum += error;
+	errorSum = errorSum <= -300 ? -300 : (errorSum >= 300 ? 300 : errorSum);			// constrain errorSum to be between -300 and 300
+
+	/* Calculate the output from PID algorithm */
+	motorPower =	  KP * error
+					+ KI * errorSum * sampleTime
+					- KD * (currentAngle - previousAngle) / sampleTime;
+
+	/*Prepare next loop */
+	previousAngle = currentAngle;
+
+	/* Set the power of the motors */
+	Motor_setPower(motorPower);
 
 }

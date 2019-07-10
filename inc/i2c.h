@@ -3,9 +3,6 @@
 
 #include <stdint.h>
 
-/* If I2C SEEPROM is tested, make sure FAST_MODE_PLUS is 0.
-For board to board test, this flag can be turned on. */
-
 #define FAST_MODE_PLUS	0
 
 #define BUFSIZE             64
@@ -54,6 +51,7 @@ For board to board test, this flag can be turned on. */
 extern void I2C_IRQHandler( void );													// Handler for i2c interrupt
 extern uint32_t I2CInit( uint32_t I2cMode );										// Init i2c bus
 
+void I2C_Read_Blocking(uint8_t dev_id, uint8_t reg, int n);							// Read n bytes from the address reg of the device (dev_id), blocking reading (not dealing with timeout issue)
 void I2C_Read_nBlocking(uint8_t dev_id, uint8_t reg, int n);						// Read n bytes from the address reg of the device (dev_id), not blocking reading
 uint8_t I2C_Write_Blocking(uint8_t dev_id, uint8_t reg, uint8_t* ba, int n);		// Write n bytes from the address reg of the device (dev_id), blocking writing
 uint8_t I2C_Write_Blocking_1B(uint8_t dev_id, uint8_t reg, uint8_t b);				// Write 1 byte to the address reg of the device (dev_id), blocking writing

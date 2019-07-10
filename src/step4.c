@@ -5,6 +5,7 @@
 #include <uart.h>
 #include <fonction.h>
 #include <motor.h>
+#include <calibrate.h>
 
 volatile uint8_t function = 1;	//Useful for communication between IMU handler and main loop
 volatile int16_t values[7] = {0,0,0,0,0,0,0};
@@ -20,8 +21,9 @@ int main()
 		Init_Motor();						//Init both motors
 		init_system = Init_IMU();			//Init IMU (and I2C in a row)
 	}
-	Init_PININT();
+	calculate_offset();
 	Motor_Start();
+	Init_PININT();
 
 
 	while(1) {	//main loop -> reading UART
