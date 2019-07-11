@@ -17,7 +17,14 @@ extern volatile uint8_t read_available;
 const float sampleTime = 0.0098;
 volatile float previousAngle = 0;
 volatile float errorSum = 0;
-volatile float targetAngle = 0;
+const float targetAngle = 0;
+
+/*DEBUG*/
+/*
+volatile float listAngle[500];
+volatile int i = 0;
+volatile int j = 0;
+*/
 
 void Init_PININT()
 {
@@ -42,8 +49,8 @@ void Init_PININT()
 
 static void compute_new_angle(float *currentAngle)
 {
-	float accAngle = atan2(values[1],values[2]) * RAD_TO_DEG;
-	float gyroSpeed = translate(values[5], -32768, 32767, -500, 500);
+	float accAngle = atan2(values[0],values[2]) * RAD_TO_DEG;
+	float gyroSpeed = translate(values[5], -32768, 32767, -250, 250);
 	float gyroAngle = (float) gyroSpeed * sampleTime;
 	*currentAngle = ALPHA * (previousAngle + gyroAngle) + (1-ALPHA) * accAngle;
 }
@@ -78,6 +85,19 @@ void PININT_IRQ_HANDLER(void)
 	/*Prepare next loop */
 	previousAngle = currentAngle;
 
+	/*
+	if (i < 500) {
+		if (j == 5) {
+			listAngle[i] = currentAngle;
+			j = 0;
+			++i;
+		} else {
+			j++;
+		}
+	} else {
+		++i;
+	}
+	*/
 	/* Set the power of the motors */
 	Motor_setPower(motorPower);
 

@@ -7,8 +7,13 @@
 #include <motor.h>
 #include <calibrate.h>
 
+#define ACC_Y_OFF		-3345
+#define ACC_Z_OFF		 1077
+#define GYRO_X_OFF		 104
+
 volatile uint8_t function = 1;	//Useful for communication between IMU handler and main loop
 volatile int16_t values[7] = {0,0,0,0,0,0,0};
+
 
 int main()
 {
