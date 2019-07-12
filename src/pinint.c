@@ -40,14 +40,13 @@ void Init_PININT()
 void PININT_IRQ_HANDLER(void)
 {
 	uint8_t per;
-	UART_PutHEX(TIMER_Get_Counter());
-	UART_PutSTR("\r\n");
 	Chip_GPIO_ClearInts(LPC_GPIO, GPIO_PININT_PORT, (1 << GPIO_PININT));
+	per = mult_per(function, values);
+	Set_TIMER_Match(0,per,PERIOD_RESET_LED);
 	if (read_available == 1) {
 		IMU_Read_Values();
 	} else { // read_available == 0
 		ask_for_new_value = 1;
 	}
-	per = mult_per(function, values);
-	Set_TIMER_Match(0,per,PERIOD_RESET_LED);
+	TIMER_Start();
 }

@@ -15,7 +15,7 @@ uint8_t Init_IMU()
 	//Init i2c bus
 	I2CInit(I2CMASTER);
 
-	while(I2C_Write_Blocking_1B(imu_address, 0x19, 0x09) == 2) {
+	while(I2C_Write_Blocking_1B(imu_address, 0x19, 0x04) == 2) {
 		UART_PutSTR("Timeout on writing into the IMU\r\n");
 		counter_timeout++;
 		if (counter_timeout == 2){

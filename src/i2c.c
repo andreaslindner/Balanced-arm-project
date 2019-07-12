@@ -110,6 +110,8 @@ void I2C_IRQHandler(void)
 			} else { //ask_for_new_value == 0
 				read_available = 1;
 			}
+			UART_PutHEX(TIMER_Get_Counter());
+			UART_PutSTR("\r\n");
 		}
 	}
 }

@@ -5,6 +5,7 @@
 #include <uart.h>
 #include <led.h>
 #include <fonction.h>
+#include <timer.h>
 
 volatile uint8_t function = 1;	//Useful for communication between IMU handler and main
 extern const uint8_t imu_address;

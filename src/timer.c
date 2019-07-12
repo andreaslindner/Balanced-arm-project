@@ -4,7 +4,7 @@
 void Init_TIMER()
 {
 	Chip_TIMER_Init(LPC_TIMER32_0);
-	Chip_TIMER_PrescaleSet(LPC_TIMER32_0, Chip_Clock_GetSystemClockRate()/10000);	//set prescale to have 1 TICK <-> 100 µs
+	Chip_TIMER_PrescaleSet(LPC_TIMER32_0, Chip_Clock_GetSystemClockRate()/100000);	//set prescale to have 1 TICK <-> 10 µs
 	Chip_TIMER_Disable(LPC_TIMER32_0);
 	Chip_TIMER_Reset(LPC_TIMER32_0);
 }
@@ -19,4 +19,9 @@ uint32_t TIMER_Get_Counter()
 void TIMER_Enable()
 {
 	Chip_TIMER_Enable(LPC_TIMER32_0);
+}
+
+void TIMER_Start()
+{
+	Chip_TIMER_Reset(LPC_TIMER32_0);
 }
