@@ -7,10 +7,6 @@
 #include <motor.h>
 #include <calibrate.h>
 
-#define ACC_Y_OFF		-3345
-#define ACC_Z_OFF		 1077
-#define GYRO_X_OFF		 104
-
 volatile uint8_t function = 1;	//Useful for communication between IMU handler and main loop
 volatile int16_t values[7] = {0,0,0,0,0,0,0};
 
@@ -26,7 +22,7 @@ int main()
 		Init_Motor();						//Init both motors
 		init_system = Init_IMU();			//Init IMU (and I2C in a row)
 	}
-	calculate_offset();
+	calculate_offset(ACC_X_OFF, ACC_Z_OFF, GYRO_Y_OFF);
 	Motor_Start();
 	Init_PININT();
 

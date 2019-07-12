@@ -15,7 +15,7 @@ void Init_rMotor()
 
 	/* Init TIMER used to produce PWM */
 	Chip_TIMER_Init(LPC_TIMER16_0);
-	Chip_TIMER_PrescaleSet(LPC_TIMER16_0, Chip_Clock_GetSystemClockRate()/100000);	//set prescale to have 1 TICK <-> 10 µs = 0.01 ms
+	Chip_TIMER_PrescaleSet(LPC_TIMER16_0, Chip_Clock_GetSystemClockRate()/255000);	//set prescale to have 255 TICKS of TIMER = 1ms
 	Chip_TIMER_Disable(LPC_TIMER16_0);
 	Chip_TIMER_Reset(LPC_TIMER16_0);
 
@@ -90,7 +90,7 @@ void rMotor_Backward(uint8_t perPower)
 			rMotor_changeDir(BACKWARD);
 		}
 		if ((0 <= perPower) && (perPower <= PERIOD_RESET_RMOTOR )) {
-			Chip_TIMER_SetMatch(LPC_TIMER16_0, 0, (100 - perPower) * PERIOD_RESET_RMOTOR / 100);
+			Chip_TIMER_SetMatch(LPC_TIMER16_0, 0, PERIOD_RESET_RMOTOR - perPower);
 		}
 	}
 }
@@ -102,7 +102,7 @@ void rMotor_Forward(uint8_t perPower)
 			rMotor_changeDir(FORWARD);
 		}
 		if ((0 <= perPower) && (perPower <= PERIOD_RESET_RMOTOR )) {
-			Chip_TIMER_SetMatch(LPC_TIMER16_0, 1, (100 - perPower) * PERIOD_RESET_RMOTOR / 100);
+			Chip_TIMER_SetMatch(LPC_TIMER16_0, 1, PERIOD_RESET_RMOTOR - perPower);
 		}
 	}
 }

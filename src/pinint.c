@@ -22,8 +22,8 @@ const float targetAngle = 0;
 /*DEBUG*/
 /*
 volatile float listAngle[500];
-volatile int i = 0;
-volatile int j = 0;
+volatile int i_s = 0;
+volatile int j_s = 0;
 */
 
 void Init_PININT()
@@ -86,18 +86,21 @@ void PININT_IRQ_HANDLER(void)
 	previousAngle = currentAngle;
 
 	/*
-	if (i < 500) {
-		if (j == 5) {
-			listAngle[i] = currentAngle;
-			j = 0;
-			++i;
+	if (i_s < 500) {
+		if (j_s == 5) {
+			listAngle[i_s] = currentAngle;
+			listAngle[i_s+1] = motorPower;
+			j_s = 0;
+			++i_s;
+			++i_s;
 		} else {
-			j++;
+			j_s++;
 		}
 	} else {
-		++i;
+		++i_s;
 	}
 	*/
+
 	/* Set the power of the motors */
 	Motor_setPower(motorPower);
 

@@ -4,10 +4,10 @@
 #include <chip.h>
 
 #define RAD_TO_DEG		57.29578
-#define ALPHA			0.9987							//change this value to change the filter : increase means give more power to gyro and decrease more power to acc
-#define KD				16								//coefficient of the proportional term (based on the current error)
-#define KI				0.02							//coefficient of the integral term (based on the accumulated error)
-#define KP				16								//coefficient of the derivate term (based on the possible future error)
+#define ALPHA			0.98							//change this value to change the filter : increase means give more power to gyro and decrease more power to acc
+#define KP				2				//coefficient of the proportional term (based on the current error)
+#define KI				0						//coefficient of the integral term (based on the accumulated error)
+#define KD				1						//coefficient of the derivate term (based on the possible future error)
 
 #define GPIO_PININT					11 					// GPIO pin number mapped to PININT
 #define GPIO_PININT_PORT			1 					// GPIO port number mapped to PININT
