@@ -32,7 +32,7 @@ void calculate_mean(int16_t *acc_x_mean, int16_t *acc_z_mean, int16_t *gyro_y_me
 			*gyro_y_mean = gyro_y_buff / BUFF_SAMPLE_SIZE;
 		}
 		++i;
-		TIMER_Wait_Till(100);		//wait till 10 ms
+		TIMER_Wait_Till(51);		//wait till 10 ms
 		TIMER_Reset();
 	}
 	TIMER_Stop();

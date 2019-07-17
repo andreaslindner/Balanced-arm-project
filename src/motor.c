@@ -1,6 +1,7 @@
 #include <rMotor.h>
 #include <lMotor.h>
 #include <stdlib.h>
+#include <uart.h>
 #include <math.h>
 
 void Init_Motor()
@@ -39,10 +40,28 @@ void Motor_Forward(uint8_t perPower)
 	lMotor_Forward(perPower);
 }
 
+static void deal_with_low_values(int *motorPower)
+{
+	if (*motorPower >= 0) {
+		if ((*motorPower >= 20) && (*motorPower <= 100)) {
+			*motorPower = 100;
+		}
+	} else {
+		if ((*motorPower <= -20) && (*motorPower >= -100)) {
+			*motorPower = -100;
+		}
+	}
+}
+
 void Motor_setPower(float motorPower)
 {
 	int motorPowerFloor = floor(motorPower);
-	motorPowerFloor = (motorPowerFloor <= -255) ? -255 : ((motorPowerFloor >= 255) ? 255 : motorPowerFloor);			//constrain the range, we want a percent
+	motorPowerFloor = (motorPowerFloor <= -255) ? -255 : ((motorPowerFloor >= 255) ? 255 : motorPowerFloor);			//constrain the range
+	//deal_with_low_values(&motorPowerFloor);
+
+	/* DEBUG */
+	/*UART_PutINT(motorPowerFloor);
+	UART_PutSTR("\r\n");*/
 
 	if (motorPowerFloor <= 0){
 		Motor_Forward(abs(motorPowerFloor));

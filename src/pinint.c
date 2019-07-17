@@ -7,6 +7,7 @@
 #include <fonction.h>
 #include <math.h>
 #include <motor.h>
+#include <timer.h>
 
 extern const uint8_t imu_address;
 extern volatile int16_t values[7];
@@ -14,17 +15,17 @@ extern volatile uint8_t function;
 extern volatile uint8_t ask_for_new_value;
 extern volatile uint8_t read_available;
 
-const float sampleTime = 0.0098;
+const float sampleTime = 0.005;
 volatile float previousAngle = 0;
 volatile float errorSum = 0;
 const float targetAngle = 0;
 
 /*DEBUG*/
-/*
+
 volatile float listAngle[500];
 volatile int i_s = 0;
 volatile int j_s = 0;
-*/
+
 
 void Init_PININT()
 {
@@ -100,7 +101,15 @@ void PININT_IRQ_HANDLER(void)
 		++i_s;
 	}
 	*/
-
+	if (i_s == 10) {
+		UART_PutINT(floor(abs(currentAngle)));
+		UART_PutSTR(" : ");
+		UART_PutINT(values[5]);
+		UART_PutSTR("\r\n");
+		i_s = 0;
+	} else {
+		++i_s;
+	}
 	/* Set the power of the motors */
 	Motor_setPower(motorPower);
 

@@ -6,8 +6,8 @@ volatile uint8_t rMotor_on = 0;
 void Init_rMotor()
 {
 	/* Change direction of pins 1_1 and 1_2 */
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 1);
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 1, 2);
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 0, 9);
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO, 0, 8);
 
 	/* Change pin function */
 	Chip_IOCON_PinMuxSet(LPC_IOCON, IOCON_PIO0_9, IOCON_FUNC0);
@@ -15,7 +15,7 @@ void Init_rMotor()
 
 	/* Init TIMER used to produce PWM */
 	Chip_TIMER_Init(LPC_TIMER16_0);
-	Chip_TIMER_PrescaleSet(LPC_TIMER16_0, Chip_Clock_GetSystemClockRate()/255000);	//set prescale to have 255 TICKS of TIMER = 1ms
+	Chip_TIMER_PrescaleSet(LPC_TIMER16_0, Chip_Clock_GetSystemClockRate() / (PERIOD_RESET_RMOTOR * RFREQ_LOOP));	//set prescale to have 255 TICKS of TIMER = 0.1ms
 	Chip_TIMER_Disable(LPC_TIMER16_0);
 	Chip_TIMER_Reset(LPC_TIMER16_0);
 
@@ -61,6 +61,7 @@ void rMotor_changeDir(uint8_t direction)
 
 			/* Free wheel */
 			Chip_TIMER_SetMatch(LPC_TIMER16_0, 1, PERIOD_RESET_RMOTOR); // set power to 0%
+			Chip_TIMER_Reset(LPC_TIMER16_0);
 			Chip_GPIO_SetPinState(LPC_GPIO, 0, 8, false);
 
 		} else {
@@ -71,6 +72,7 @@ void rMotor_changeDir(uint8_t direction)
 
 				/* Free wheel */
 				Chip_TIMER_SetMatch(LPC_TIMER16_0, 0, PERIOD_RESET_RMOTOR); // set power to 0%
+				Chip_TIMER_Reset(LPC_TIMER16_0);
 				Chip_GPIO_SetPinState(LPC_GPIO, 0, 9, false);
 			}
 
@@ -91,6 +93,7 @@ void rMotor_Backward(uint8_t perPower)
 		}
 		if ((0 <= perPower) && (perPower <= PERIOD_RESET_RMOTOR )) {
 			Chip_TIMER_SetMatch(LPC_TIMER16_0, 0, PERIOD_RESET_RMOTOR - perPower);
+			Chip_TIMER_Reset(LPC_TIMER16_0);
 		}
 	}
 }
@@ -103,6 +106,7 @@ void rMotor_Forward(uint8_t perPower)
 		}
 		if ((0 <= perPower) && (perPower <= PERIOD_RESET_RMOTOR )) {
 			Chip_TIMER_SetMatch(LPC_TIMER16_0, 1, PERIOD_RESET_RMOTOR - perPower);
+			Chip_TIMER_Reset(LPC_TIMER16_0);
 		}
 	}
 }

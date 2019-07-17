@@ -15,7 +15,7 @@ void Init_lMotor()
 
 	/* Init TIMER used to produce PWM */
 	Chip_TIMER_Init(LPC_TIMER32_1);
-	Chip_TIMER_PrescaleSet(LPC_TIMER32_1, Chip_Clock_GetSystemClockRate()/255000);	//set prescale to have 255 TICKs of the TIMER <-> 1 ms
+	Chip_TIMER_PrescaleSet(LPC_TIMER32_1, Chip_Clock_GetSystemClockRate() / (PERIOD_RESET_LMOTOR * LFREQ_LOOP));	//set prescale to have 255 TICKs of the TIMER <-> 1 ms
 	Chip_TIMER_Disable(LPC_TIMER32_1);
 	Chip_TIMER_Reset(LPC_TIMER32_1);
 
@@ -61,6 +61,7 @@ void lMotor_changeDir(uint8_t direction)
 
 			/* Free wheel */
 			Chip_TIMER_SetMatch(LPC_TIMER32_1, 0, PERIOD_RESET_LMOTOR); // set power to 0%
+			Chip_TIMER_Reset(LPC_TIMER32_1);
 			Chip_GPIO_SetPinState(LPC_GPIO, 1, 2, false);
 
 		} else {
@@ -71,6 +72,7 @@ void lMotor_changeDir(uint8_t direction)
 
 				/* Free wheel */
 				Chip_TIMER_SetMatch(LPC_TIMER32_1, 1, PERIOD_RESET_LMOTOR); // set power to 0%
+				Chip_TIMER_Reset(LPC_TIMER32_1);
 				Chip_GPIO_SetPinState(LPC_GPIO, 1, 1, false);
 			}
 
@@ -91,6 +93,7 @@ void lMotor_Backward(uint8_t perPower)
 		}
 		if ((0 <= perPower) && (perPower <= PERIOD_RESET_LMOTOR )) {
 			Chip_TIMER_SetMatch(LPC_TIMER32_1, 1, PERIOD_RESET_LMOTOR - perPower);
+			Chip_TIMER_Reset(LPC_TIMER32_1);
 		}
 	}
 }
@@ -103,6 +106,7 @@ void lMotor_Forward(uint8_t perPower)
 		}
 		if ((0 <= perPower) && (perPower <= PERIOD_RESET_LMOTOR )) {
 			Chip_TIMER_SetMatch(LPC_TIMER32_1, 0, PERIOD_RESET_LMOTOR - perPower);
+			Chip_TIMER_Reset(LPC_TIMER32_1);
 		}
 	}
 }

@@ -29,6 +29,7 @@ extern volatile int16_t values[7];
 volatile uint8_t ask_for_reading_while_busy = 0;
 extern const uint8_t imu_address;
 
+
 uint8_t I2C_Write_Blocking(uint8_t dev_id, uint8_t reg, uint8_t* ba, int n)
 {
 	if ((n >= BUFSIZE-2) | (n < 0))

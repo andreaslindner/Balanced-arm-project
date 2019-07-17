@@ -7,8 +7,8 @@
 #include <motor.h>
 #include <calibrate.h>
 
-volatile uint8_t function = 1;	//Useful for communication between IMU handler and main loop
-volatile int16_t values[7] = {0,0,0,0,0,0,0};
+volatile uint8_t function = 1;							//Useful for communication between IMU handler and main loop
+volatile int16_t values[7] = {0,0,0,0,0,0,0};			//Values of the IMU
 
 
 int main()
@@ -23,6 +23,7 @@ int main()
 		init_system = Init_IMU();			//Init IMU (and I2C in a row)
 	}
 	calculate_offset(ACC_X_OFF, ACC_Z_OFF, GYRO_Y_OFF);
+
 	Motor_Start();
 	Init_PININT();
 
