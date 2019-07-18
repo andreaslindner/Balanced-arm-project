@@ -15,7 +15,7 @@ void Init_lMotor()
 
 	/* Init TIMER used to produce PWM */
 	Chip_TIMER_Init(LPC_TIMER32_1);
-	Chip_TIMER_PrescaleSet(LPC_TIMER32_1, Chip_Clock_GetSystemClockRate() / (PERIOD_RESET_LMOTOR * LFREQ_LOOP));	//set prescale to have 255 TICKs of the TIMER <-> 1 ms
+	Chip_TIMER_PrescaleSet(LPC_TIMER32_1, Chip_Clock_GetSystemClockRate() / (PERIOD_RESET_LMOTOR * LFREQ_LOOP));	//set prescale to have PERIOD_RESET_LMOTOR TICKs of the TIMER <-> 1 ms
 	Chip_TIMER_Disable(LPC_TIMER32_1);
 	Chip_TIMER_Reset(LPC_TIMER32_1);
 

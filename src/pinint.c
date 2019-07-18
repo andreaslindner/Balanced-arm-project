@@ -21,22 +21,22 @@ volatile float errorSum = 0;
 const float targetAngle = 0;
 
 /*DEBUG*/
-
+/*
 volatile float listAngle[500];
 volatile int i_s = 0;
 volatile int j_s = 0;
-
+*/
 
 void Init_PININT()
 {
-	//Ser pin dir as input
+	//Set pin dir as input
 	Chip_GPIO_SetPinDIRInput(LPC_GPIO, GPIO_PININT_PORT, GPIO_PININT);
-	//Configure pin as GPIO with pullup
+	//Configure pin as GPIO with pull-up
 	Chip_IOCON_PinMuxSet(LPC_IOCON, IOCON_PIN_ID, (IOCON_FUNC0 | IOCON_MODE_PULLUP | IOCON_DIGMODE_EN));
 	// Configure channel interrupt as edge sensitive and rising edge interrupt
 	Chip_GPIO_SetupPinInt(LPC_GPIO, GPIO_PININT_PORT, GPIO_PININT, GPIO_INT_RISING_EDGE);
 
-	// Enable GPIO pin intrerrupt
+	// Enable GPIO pin interrupt
 	Chip_GPIO_EnableInt(LPC_GPIO, GPIO_PININT_PORT, (1 << GPIO_PININT));
 
 	//Set register as 0
@@ -53,6 +53,15 @@ static void compute_new_angle(float *currentAngle)
 	float accAngle = atan2(values[0],values[2]) * RAD_TO_DEG;
 	float gyroSpeed = translate(values[5], -32768, 32767, -250, 250);
 	float gyroAngle = (float) gyroSpeed * sampleTime;
+
+	/*		DEBUG ANGLE
+	 *
+	UART_PutINT((int)(previousAngle + gyroAngle));
+	UART_PutSTR(" : ");
+	UART_PutINT((int)(accAngle));
+	UART_PutSTR("\r\n");
+	*/
+
 	*currentAngle = ALPHA * (previousAngle + gyroAngle) + (1-ALPHA) * accAngle;
 }
 
@@ -62,13 +71,6 @@ void PININT_IRQ_HANDLER(void)
 
 	/* Clear Int */
 	Chip_GPIO_ClearInts(LPC_GPIO, GPIO_PININT_PORT, (1 << GPIO_PININT));
-
-	/* Ask for read a new value of the IMU */
-	if (read_available == 1) {
-		IMU_Read_Values();
-	} else { // read_available == 0
-		ask_for_new_value = 1;
-	}
 
 	/* Calculate the angle */
 	compute_new_angle(&currentAngle);
@@ -101,16 +103,15 @@ void PININT_IRQ_HANDLER(void)
 		++i_s;
 	}
 	*/
-	if (i_s == 10) {
-		UART_PutINT(floor(abs(currentAngle)));
-		UART_PutSTR(" : ");
-		UART_PutINT(values[5]);
-		UART_PutSTR("\r\n");
-		i_s = 0;
-	} else {
-		++i_s;
-	}
+
 	/* Set the power of the motors */
 	Motor_setPower(motorPower);
+
+	/* Ask for read a new value of the IMU */
+	if (read_available == 1) {
+		IMU_Read_Values();
+	} else { // read_available == 0
+		ask_for_new_value = 1;
+	}
 
 }
