@@ -20,6 +20,11 @@ volatile float previousAngle = 0;
 volatile float errorSum = 0;
 const float targetAngle = 0;
 
+extern volatile float kp;
+extern volatile float ki;
+extern volatile float kd;
+extern volatile float alpha;
+
 /*DEBUG*/
 /*
 volatile float listAngle[500];
@@ -55,14 +60,14 @@ static void compute_new_angle(float *currentAngle)
 	float gyroAngle = (float) gyroSpeed * sampleTime;
 
 	/*		DEBUG ANGLE
-	 *
+
 	UART_PutINT((int)(previousAngle + gyroAngle));
 	UART_PutSTR(" : ");
 	UART_PutINT((int)(accAngle));
 	UART_PutSTR("\r\n");
 	*/
 
-	*currentAngle = ALPHA * (previousAngle + gyroAngle) + (1-ALPHA) * accAngle;
+	*currentAngle = alpha * (previousAngle + gyroAngle) + (1-alpha) * accAngle;
 }
 
 void PININT_IRQ_HANDLER(void)
@@ -81,9 +86,9 @@ void PININT_IRQ_HANDLER(void)
 	errorSum = errorSum <= -300 ? -300 : (errorSum >= 300 ? 300 : errorSum);			// constrain errorSum to be between -300 and 300
 
 	/* Calculate the output from PID algorithm */
-	motorPower =	  KP * error
-					+ KI * errorSum * sampleTime
-					- KD * (currentAngle - previousAngle) / sampleTime;
+	motorPower =	  kp * error
+					+ ki * errorSum * sampleTime
+					- kd * (currentAngle - previousAngle) / sampleTime;
 
 	/*Prepare next loop */
 	previousAngle = currentAngle;

@@ -3,3 +3,4 @@
 Debug
 *.launch
 .settings
+.metadata

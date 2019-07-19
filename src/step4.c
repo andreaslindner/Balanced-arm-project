@@ -10,10 +10,13 @@
 volatile uint8_t function = 1;							//Useful for communication between IMU handler and main loop
 volatile int16_t values[7] = {0,0,0,0,0,0,0};			//Values of the IMU
 
+volatile float kp = 0;
+volatile float ki = 0;
+volatile float kd = 0;
+volatile float alpha = 0.9;
 
 int main()
 {
-	uint8_t tmp;
 	uint8_t init_system = 1;
 
 	while (init_system) {
@@ -30,13 +33,7 @@ int main()
 
 	while(1) {	//main loop -> reading UART
 
-		tmp = UART_Read_max_nB(1);
-		if (tmp != 10) {
-			function = tmp;
-			UART_PutSTR("Function set as : ");
-			UART_PutHEX(function);
-			UART_PutSTR("\r\n");
-		}
+		UART_Read_PID();
 	}
 	return(0);
 }

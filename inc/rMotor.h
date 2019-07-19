@@ -1,7 +1,7 @@
 #ifndef RMOTOR_H_
 #define RMOTOR_H_
 
-#define PERIOD_RESET_RMOTOR 256 // Number of tick for pwm period
+#define PERIOD_RESET_RMOTOR 256 // Number of TIMER ticks for pwm period
 #define RFREQ_LOOP 1000			// Frequency of the loop
 
 #include <stdint.h>

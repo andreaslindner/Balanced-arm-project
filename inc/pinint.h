@@ -5,9 +5,9 @@
 
 #define RAD_TO_DEG		57.29578
 #define ALPHA			0.9								//change this value to change the filter : increase means give more power to gyro and decrease more power to acc
-#define KP				8								//coefficient of the proportional term (based on the current error)
-#define KI				0								//coefficient of the integral term (based on the accumulated error)
-#define KD				0								//coefficient of the derivate term (based on the possible future error)
+#define KP				40								//coefficient of the proportional term (based on the current error)
+#define KI				40								//coefficient of the integral term (based on the accumulated error)
+#define KD				0.05								//coefficient of the derivate term (based on the possible future error)
 
 #define GPIO_PININT					11 					// GPIO pin number mapped to PININT
 #define GPIO_PININT_PORT			1 					// GPIO port number mapped to PININT

@@ -40,15 +40,15 @@ void Motor_Forward(uint8_t perPower)
 	lMotor_Forward(perPower);
 }
 
-static void deal_with_low_values(int *motorPower)
+static void deal_with_low_values(int *motorPower, int minValue, int minRunValue)
 {
 	if (*motorPower >= 0) {
-		if ((*motorPower >= 20) && (*motorPower <= 100)) {
-			*motorPower = 100;
+		if ((*motorPower >= minRunValue) && (*motorPower <= minValue)) {
+			*motorPower = minValue;
 		}
 	} else {
-		if ((*motorPower <= -20) && (*motorPower >= -100)) {
-			*motorPower = -100;
+		if ((*motorPower <= -minRunValue) && (*motorPower >= -minRunValue)) {
+			*motorPower = -minRunValue;
 		}
 	}
 }
