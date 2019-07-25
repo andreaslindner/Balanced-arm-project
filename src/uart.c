@@ -5,8 +5,14 @@
 #include <string.h>
 #include <math.h>
 
+#include <wolfssl/options.h>
+#include <wolfssl/wolfcrypt/settings.h>
+#include <wolfssl/wolfcrypt/sha256.h>
+#include <wolfcrypt/src/sha256.c>
+
 uint8_t UART_BUFFER_counter = 0;
 uint8_t UART_BUFFER[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
 
 extern volatile float kp;
 extern volatile float ki;
@@ -139,6 +145,12 @@ uint8_t UART_Read_max_nB(uint32_t n)
 	return byte;
 }
 
+void UART_Read_Replay()
+{
+	char byte;
+	while (Chip_UART_Read(LPC_USART, &byte, 1) == 0);
+	UART_PutCHAR(byte);
+}
 
 
 static void cleanBuffer()
@@ -321,3 +333,59 @@ void UART_Read_PID()
 	}
 }
 
+void UART_Test_SHA256()
+{
+	char UART_BUFFER_SHA256[64];	//64 bytes (32 message + 32 sha256)
+	byte MESSAGE[32];
+	byte HASH[32];
+
+	uint8_t cond = 1;
+
+	uint8_t counter = 0;
+	char byte;
+
+	while(counter < 64) {
+		if (Chip_UART_Read(LPC_USART, &byte, 1) > 0) {
+			UART_BUFFER_SHA256[counter] = byte;
+			counter++;
+		}
+	}
+
+	for (counter = 0; counter < 32; ++counter) {
+		MESSAGE[counter] = UART_BUFFER_SHA256[counter];
+	}
+
+	Sha256 sha;
+	wc_InitSha256(&sha);
+	wc_Sha256Update(&sha, MESSAGE, 32);
+	wc_Sha256Final(&sha, HASH);
+
+	counter = 0;
+	while ((counter < 32) && (cond == 1)) {
+		if (HASH[counter] != UART_BUFFER_SHA256[32 + counter]) {
+			cond = 0;
+		}
+	}
+
+	cond == 1 ? UART_PutSTR("Success\r\n") : UART_PutSTR("Fail\r\n");
+	UART_PutSTR(HASH);
+}
+
+void UART_Send_SHA256(char* buffer, uint8_t size)
+{
+	byte HASH[32];
+
+	if (size > 32) {
+		return;
+	}
+	else {
+		Sha256 sha;
+		wc_InitSha256(&sha);
+		wc_Sha256Update(&sha, buffer, size);
+		wc_Sha256Final(&sha, HASH);
+		for (int i = 0; i < 32; ++i) {
+			UART_PutHEX(HASH[i]);
+			UART_PutSTR("\r\n");
+		}
+	}
+}
