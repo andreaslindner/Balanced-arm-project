@@ -3,9 +3,7 @@
 
 #include <stdint.h>
 #define BAUDRATE 9600 //Baudrate
-#define SINGLE_THREADED
-#define NO_FILESYSTEM
-#undef NO_SHA256
+
 
 void Init_UART();							// Init UART
 void Quit_UART();							// Quit UART
@@ -18,5 +16,6 @@ uint8_t UART_Read_max_nB(uint32_t n);		// Read UART, stop when fifo empty or whe
 void UART_Read_PID();						// Read UART, waiting for the good sentence to modify PID
 void UART_Test_SHA256();					// Verify that SHA256 is working
 void UART_Read_Replay();					// Send what we receive
+void UART_Test_HMAC_SHA256();				// Verify that HMAC-SHA256 is working
 
 #endif /* UART_H_ */

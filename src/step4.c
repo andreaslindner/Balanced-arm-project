@@ -18,7 +18,6 @@ volatile float alpha = 0.9;
 int main()
 {
 	uint8_t init_system = 1;
-	char MESS[32] = "11111111111111111111111111111111";
 
 	while (init_system) {
 		Chip_GPIO_Init(LPC_GPIO);			//Init chip
@@ -31,10 +30,9 @@ int main()
 	Motor_Start();
 	Init_PININT();
 	
-	UART_Send_SHA256(MESS, 32);
 	while(1) {	//main loop -> reading UART
 
-		UART_Read_Replay();
+		UART_Test_HMAC_SHA256();
 	}
 	return(0);
 }

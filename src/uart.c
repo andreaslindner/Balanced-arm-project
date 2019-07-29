@@ -4,11 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-
-#include <wolfssl/options.h>
-#include <wolfssl/wolfcrypt/settings.h>
-#include <wolfssl/wolfcrypt/sha256.h>
-#include <wolfcrypt/src/sha256.c>
+#include <crypto.h>
 
 uint8_t UART_BUFFER_counter = 0;
 uint8_t UART_BUFFER[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -160,20 +156,20 @@ static void cleanBuffer()
 		UART_BUFFER[i] = 0;
 	}
 	UART_BUFFER_counter = 0;
-	UART_PutSTR("Buffer cleaned\r\n");
+	UART_PutSTR("Buffer cleaned\r\n\0");
 }
 
 static void UART_PutPID()
 {
-	UART_PutSTR(" -> Kp : ");
+	UART_PutSTR(" -> Kp : \0");
 	UART_PutFLOAT(kp, 6);
 	UART_PutSTR(", ");
-	UART_PutSTR("Kd : ");
+	UART_PutSTR("Kd : \0");
 	UART_PutFLOAT(kd, 6);
 	UART_PutSTR(", ");
-	UART_PutSTR("Ki : ");
+	UART_PutSTR("Ki : \0");
 	UART_PutFLOAT(ki, 6);
-	UART_PutSTR("\r\n");
+	UART_PutSTR("\r\n0");
 }
 
 static void analyseBuffer()
@@ -335,18 +331,18 @@ void UART_Read_PID()
 
 void UART_Test_SHA256()
 {
-	char UART_BUFFER_SHA256[64];	//64 bytes (32 message + 32 sha256)
+	byte UART_BUFFER_SHA256[64];	//64 bytes (32 message + 32 sha256)
 	byte MESSAGE[32];
 	byte HASH[32];
 
 	uint8_t cond = 1;
 
 	uint8_t counter = 0;
-	char byte;
+	byte byteR;
 
 	while(counter < 64) {
-		if (Chip_UART_Read(LPC_USART, &byte, 1) > 0) {
-			UART_BUFFER_SHA256[counter] = byte;
+		if (Chip_UART_Read(LPC_USART, &byteR, 1) > 0) {
+			UART_BUFFER_SHA256[counter] = byteR;
 			counter++;
 		}
 	}
@@ -355,37 +351,52 @@ void UART_Test_SHA256()
 		MESSAGE[counter] = UART_BUFFER_SHA256[counter];
 	}
 
-	Sha256 sha;
-	wc_InitSha256(&sha);
-	wc_Sha256Update(&sha, MESSAGE, 32);
-	wc_Sha256Final(&sha, HASH);
+	HASH_SHA256(MESSAGE, 32, HASH);
 
 	counter = 0;
 	while ((counter < 32) && (cond == 1)) {
 		if (HASH[counter] != UART_BUFFER_SHA256[32 + counter]) {
 			cond = 0;
 		}
+		counter++;
 	}
 
-	cond == 1 ? UART_PutSTR("Success\r\n") : UART_PutSTR("Fail\r\n");
-	UART_PutSTR(HASH);
+		cond == 1 ? UART_PutSTR("Success\r\n\0") : UART_PutSTR("Fail\r\n\0");
 }
 
-void UART_Send_SHA256(char* buffer, uint8_t size)
-{
-	byte HASH[32];
 
-	if (size > 32) {
-		return;
-	}
-	else {
-		Sha256 sha;
-		wc_InitSha256(&sha);
-		wc_Sha256Update(&sha, buffer, size);
-		wc_Sha256Final(&sha, HASH);
-		for (int i = 0; i < 32; ++i) {
-			UART_PutHEX(HASH[i]);
-			UART_PutSTR("\r\n");
+void UART_Test_HMAC_SHA256()
+{
+	byte UART_BUFFER_SHA256[64];	//64 bytes (32 message + 32 sha256)
+	byte MESSAGE[32];
+	byte HASH[32];
+	byte KEY[32] = "11111111111111111111111111111111";
+
+	uint8_t cond = 1;
+
+	uint8_t counter = 0;
+	byte byteR;
+
+	while(counter < 64) {
+		if (Chip_UART_Read(LPC_USART, &byteR, 1) > 0) {
+			UART_BUFFER_SHA256[counter] = byteR;
+			counter++;
 		}
 	}
+
+	for (counter = 0; counter < 32; ++counter) {
+		MESSAGE[counter] = UART_BUFFER_SHA256[counter];
+	}
+
+	HMAC_SHA256(MESSAGE, 32, KEY, 32, HASH);
+
+	counter = 0;
+	while ((counter < 32) && (cond == 1)) {
+		if (HASH[counter] != UART_BUFFER_SHA256[32 + counter]) {
+			cond = 0;
+		}
+		counter++;
+	}
+
+		cond == 1 ? UART_PutSTR("Success\r\n\0") : UART_PutSTR("Fail\r\n\0");
 }
