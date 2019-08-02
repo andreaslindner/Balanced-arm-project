@@ -5,6 +5,7 @@
 #include <string.h>
 #include <math.h>
 #include <crypto.h>
+#include <timer.h>
 
 uint8_t UART_BUFFER_counter = 0;
 uint8_t UART_BUFFER[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -15,6 +16,8 @@ extern volatile float ki;
 extern volatile float kd;
 extern volatile float errorSum;
 extern volatile float alpha;
+extern uint16_t nounce;
+const byte ACK[14] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 
 void Init_UART()
@@ -44,6 +47,15 @@ void UART_PutSTR(char *str)
 {
 	while (*str != '\0') {
 		UART_PutCHAR(*str++);
+	}
+}
+
+void UART_PutSTR2(char *str, uint16_t size)
+{
+	uint16_t counter = 0;
+	while (counter < size) {
+		UART_PutCHAR(*str++);
+		counter++;
 	}
 }
 
@@ -400,3 +412,232 @@ void UART_Test_HMAC_SHA256()
 
 		cond == 1 ? UART_PutSTR("Success\r\n\0") : UART_PutSTR("Fail\r\n\0");
 }
+
+
+void UART_Read(uint8_t* b) {
+	Chip_UART_ReadBlocking(LPC_USART, b, 1);
+}
+
+uint8_t UART_Handshake(const byte KEY[32], byte *DERIVATE_KEY)
+{
+	uint8_t i = 0, same_hash = 1;
+	byte byt, IV[16], MESSAGE[32], CIPHER_HASH[32], PLAIN_HASH[32], MY_HASH[32];
+
+	//We get IV(16B)|M(32B)|H(32B)
+
+	for (; i < 80; ++i){
+		UART_Read(&byt);
+		if (i < 16) {
+			IV[i] = byt;
+		} else {
+			if (i < 48) {
+				MESSAGE[i - 16] = byt;
+			} else {
+				CIPHER_HASH[i - 48] = byt;
+			}
+		}
+	}
+
+	// We decrypt the hash using AES_256_CBC
+
+	Decrypt_AES258_CBC(KEY, PLAIN_HASH, CIPHER_HASH, IV);
+
+	// We verify that we've got the same hash
+
+	HASH_SHA256(MESSAGE, 32, MY_HASH);
+
+	for (i = 0; i < 32; ++i) {
+		if (PLAIN_HASH[i] != MY_HASH[i]) {
+			same_hash = 0;
+			break;
+		}
+	}
+
+	if (!same_hash) {
+		return 1;
+	}
+
+	// Add 1 to IV to change vector
+	i = 0;
+
+	while ((i != 16) && (IV[i] == 255)) {
+		IV[i] = 0;
+		++i;
+	}
+	if (i != 16) {
+		IV[i] += 1;
+	}
+
+
+	//Compute the derivate key
+	Encrypt_AES258_CBC(KEY, DERIVATE_KEY, MESSAGE, IV);
+
+	/* Send ACK */
+	UART_SendSTR_Signed(ACK, 14, DERIVATE_KEY, 1);
+
+	/*increment nounce */
+	nounce++;
+
+
+	return 0;
+}
+
+static void UART_Send_nB(const byte *message, const uint8_t sizeMessage) {
+	Chip_UART_SendBlocking(LPC_USART, message, (int)sizeMessage);
+}
+
+static uint8_t ByteArray_Equal(const byte one[], const byte two[], uint8_t size)
+{
+	for (uint8_t i = 0; i < size; ++i) {
+		if (one[i] != two[i]) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+static uint8_t Wait_ACK(const byte KEY[32])
+{
+	uint8_t counter = 0;
+	uint8_t timeout = 1;
+	byte PLAIN_TEXT[16];
+	byte HASH[32];
+	byte HASH_VERIFY[32];
+	uint16_t received_nounce;
+
+	Init_TIMER();
+	TIMER_Start();
+
+	/* while we don't timeout, we try to read ACK */
+	while (TIMER_getCounter() < (TIMEOUT_ACK * PRESCALE)) {
+
+		if (counter < 16) {
+			if (Chip_UART_Read(LPC_USART, &PLAIN_TEXT[counter], 1) > 0) {
+				counter++;
+			}
+		} else {
+			if (Chip_UART_Read(LPC_USART, &HASH[counter - 16], 1) > 0) {
+				counter++;
+				if (counter == 48) {
+					timeout = 0;
+					break;
+				}
+			}
+		}
+	}
+
+	TIMER_Stop();
+	TIMER_DeInit();
+
+	if (timeout == 1) {
+		return 1;
+	}
+
+	/* we didn't timeout, we have to verify the message now */
+	if (ByteArray_Equal(PLAIN_TEXT, ACK, 14) != 0) {
+		return 2;
+	}
+
+	/*ACK is ok, verify nouce now */
+	received_nounce = (PLAIN_TEXT[15] << 8) | (PLAIN_TEXT[14]);
+	if (received_nounce != nounce) {
+		return 3;
+	}
+
+	/* Now we verify the HASH */
+	HMAC_SHA256(PLAIN_TEXT, 16, KEY, 32, HASH_VERIFY);
+	if (ByteArray_Equal(HASH, HASH_VERIFY, 32) != 0) {
+		return 4;
+	}
+
+	return 0;
+}
+
+uint8_t UART_SendSTR_Signed(const byte message[], const uint16_t sizeMessage, const byte KEY[32], uint8_t is_ACK)
+{
+	byte HASH[32];
+	byte MESSAGE_S[16];
+	uint16_t counter = 0;
+	uint8_t i;
+
+	/* for each block of 14 bytes */
+	for (; counter < sizeMessage; counter+= 14) {
+
+		/* fill with the message or '\0' if empty */
+		for (i = 0; i < 14; ++i) {
+			if ((counter + i) < sizeMessage) {
+				MESSAGE_S[i] = message[counter + i];
+			} else {
+				MESSAGE_S[i] = 0;
+			}
+		}
+
+		/* 2 last bytes are nounce */
+		MESSAGE_S[14] = (byte) (nounce & 0xFF);				//first byte of nounce
+		MESSAGE_S[15] = (byte) ((nounce & 0xFF00) >> 8);	//second byte of nounce
+
+		/* get the HMAC */
+		HMAC_SHA256(MESSAGE_S, 16, KEY, 32, HASH);
+
+		/* Send message|nounce|hash = 48 bytes */
+		UART_Send_nB(MESSAGE_S, 16);
+		UART_Send_nB(HASH, 32);
+
+		/* Wait for ACK if its not ACK */
+		if (!is_ACK) {
+			if (Wait_ACK(KEY) != 0) {
+				return 1;
+			}
+			nounce++;
+		}
+	}
+	return 0;
+}
+
+uint16_t UART_ReceiveSTR_Signed(byte MESSAGE[], const byte KEY[32])
+{
+	byte HASH[32];
+	byte PLAIN_TEXT[16];
+	int8_t i;
+	byte HASH_VERIFY[32];
+	uint16_t received_nounce;
+
+	/* receive one packet of 48 bytes */
+	for (i = 0; i < 48; ++i) {
+		if (i < 16) {
+			while(Chip_UART_Read(LPC_USART, &PLAIN_TEXT[i], 1) == 0);
+		} else {
+			while(Chip_UART_Read(LPC_USART, &HASH[i - 16], 1) == 0);
+		}
+	}
+
+	/* analyze the packet */
+
+		/* nounce */
+	received_nounce = (PLAIN_TEXT[15] << 8) | (PLAIN_TEXT[14]);
+	if (received_nounce != nounce) {
+		return 0;
+	}
+
+		/* hash */
+	HMAC_SHA256(PLAIN_TEXT, 16, KEY, 32, HASH_VERIFY);
+	if (ByteArray_Equal(HASH, HASH_VERIFY, 32) != 0) {
+		return 0;
+	}
+
+	/* Send ACK */
+	UART_SendSTR_Signed(ACK, 14, KEY, 1);
+
+	/* increment nounce */
+	nounce++;
+
+	/* add the message (14 first bytes of plain_text) to the buffer MESSAGE */
+	for (i = 0; i < 14; ++i) {
+
+		MESSAGE[i] = PLAIN_TEXT[i];
+	}
+
+ 	return 14;
+}
+
+

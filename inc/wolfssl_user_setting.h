@@ -16,6 +16,10 @@ extern "C" {
 #undef  SINGLE_THREADED
 #define SINGLE_THREADED
 
+#undef NO_INLINE
+#define NO_INLINE
+
+
 #undef  WOLFSSL_SMALL_STACK
 //#define WOLFSSL_SMALL_STACK
 
@@ -135,13 +139,13 @@ extern "C" {
 
 /* AES */
 #undef NO_AES
-#if 0
-    #undef  HAVE_AESGCM
-    #define HAVE_AESGCM
+#if 1
+    #undef  HAVE_AESCBC
+    #define HAVE_AESCBC
 
     /* GCM Method: GCM_SMALL, GCM_WORD32 or GCM_TABLE */
-    #undef  GCM_SMALL
-    #define GCM_SMALL
+/*    #undef  GCM_SMALL
+    #define GCM_SMALL*/
 #else
     #define NO_AES
 #endif
@@ -359,7 +363,10 @@ extern unsigned int custom_rand_generate(void);
 /* If defined, must include wolfcrypt/src/misc.c in build */
 /* Slower, but about 1k smaller */
 #undef  NO_INLINE
-//#define NO_INLINE
+#define NO_INLINE
+
+#undef USE_SLOW_SHA256
+#define USE_SLOW_SHA256
 
 #undef  NO_FILESYSTEM
 #define NO_FILESYSTEM

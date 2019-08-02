@@ -73,7 +73,9 @@ static void compute_new_angle(float *currentAngle)
 void PININT_IRQ_HANDLER(void)
 {
 	float currentAngle, error, motorPower;
-
+	UART_PutINT(TIMER_getCounter());
+	UART_PutSTR("\n");
+	TIMER_Reset();
 	/* Clear Int */
 	Chip_GPIO_ClearInts(LPC_GPIO, GPIO_PININT_PORT, (1 << GPIO_PININT));
 

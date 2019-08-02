@@ -16,56 +16,56 @@ uint8_t Init_IMU()
 	I2CInit(I2CMASTER);
 
 	while(I2C_Write_Blocking_1B(imu_address, 0x19, 0x04) == 2) {	//Set the sample rate to 100 Hz when DLPF is enabled, otherwise it's set to 800 Hz.
-		UART_PutSTR("Timeout on writing into the IMU\r\n");
+		//UART_PutSTR("Timeout on writing into the IMU\r\n");
 		counter_timeout++;
 		if (counter_timeout == 2){
 			return 1;
 		}
 	}
 	while(I2C_Write_Blocking_1B(imu_address, 0x1B, 0x08) == 2) {	//Gyro scale range set to +- 250°/s, LSB sensitivity 131 LSB/(°/s)
-		UART_PutSTR("Timeout on writing into the IMU\r\n");
+		//UART_PutSTR("Timeout on writing into the IMU\r\n");
 		counter_timeout++;
 		if (counter_timeout == 2){
 			return 1;
 		}
 	}
 	while(I2C_Write_Blocking_1B(imu_address, 0x1C, 0x10) == 2) {	//Acc scale range set to +- 2g, LSB sensitivity 16 384 LSB/g
-		UART_PutSTR("Timeout on writing into the IMU\r\n");
+		//UART_PutSTR("Timeout on writing into the IMU\r\n");
 		counter_timeout++;
 		if (counter_timeout == 2){
 			return 1;
 		}
 	}
 	while(I2C_Write_Blocking_1B(imu_address, 0x38, 0x01) == 2) {	//Enable interrupt when new data to be read is ready
-		UART_PutSTR("Timeout on writing into the IMU\r\n");
+		//UART_PutSTR("Timeout on writing into the IMU\r\n");
 		counter_timeout++;
 		if (counter_timeout == 2){
 			return 1;
 		}
 	}
 	while(I2C_Write_Blocking_1B(imu_address, 0x1A, 0x1) == 2) {		//Set low pass filter to 184 Hz for gyro and 188 Hz for acc (randomly chosen)
-		UART_PutSTR("Timeout on writing into the IMU\r\n");
+		//UART_PutSTR("Timeout on writing into the IMU\r\n");
 		counter_timeout++;
 		if (counter_timeout == 2){
 			return 1;
 		}
 	}
 	while(I2C_Write_Blocking_1B(imu_address, 0x37, 0x30) == 2) {	//Configure interrupt behavior
-		UART_PutSTR("Timeout on writing into the IMU\r\n");
+		//UART_PutSTR("Timeout on writing into the IMU\r\n");
 		counter_timeout++;
 		if (counter_timeout == 2){
 			return 1;
 		}
 	}
 	while(I2C_Write_Blocking_1B(imu_address, 0x6B, 0x00) == 2) {	// Power management (here clock source is Internal 8MHz oscillator)
-		UART_PutSTR("Timeout on writing into the IMU\r\n");
+		//UART_PutSTR("Timeout on writing into the IMU\r\n");
 		counter_timeout++;
 		if (counter_timeout == 2){
 			return 1;
 		}
 	}
 
-	UART_PutSTR("imu: wake MPU6050\r\n");
+	//UART_PutSTR("imu: wake MPU6050\r\n");
 
 	return 0;
 }
