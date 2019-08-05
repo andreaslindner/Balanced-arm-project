@@ -29,7 +29,10 @@ void TIMER_Wait_Till(uint16_t checkpoint)
 
 uint16_t TIMER_getCounter()
 {
-	return (LPC_TIMER16_1 -> TC);
+	uint16_t a = LPC_TIMER16_1 -> TC;
+
+	Chip_TIMER_Reset(LPC_TIMER16_1);
+	return a;
 }
 
 void TIMER_Stop()

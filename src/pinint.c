@@ -18,12 +18,13 @@ extern volatile uint8_t read_available;
 const float sampleTime = 0.005;
 volatile float previousAngle = 0;
 volatile float errorSum = 0;
-const float targetAngle = 0;
+const float targetAngle = -1;
 
 extern volatile float kp;
 extern volatile float ki;
 extern volatile float kd;
 extern volatile float alpha;
+extern volatile uint8_t first;
 
 /*DEBUG*/
 /*
@@ -55,7 +56,7 @@ void Init_PININT()
 
 static void compute_new_angle(float *currentAngle)
 {
-	float accAngle = atan2(values[0],values[2]) * RAD_TO_DEG;
+	float accAngle =  (values[2] == 0) ? 0 : (atan2(values[0],values[2]) * RAD_TO_DEG);
 	float gyroSpeed = translate(values[5], -32768, 32767, -250, 250);
 	float gyroAngle = (float) gyroSpeed * sampleTime;
 
@@ -73,14 +74,19 @@ static void compute_new_angle(float *currentAngle)
 void PININT_IRQ_HANDLER(void)
 {
 	float currentAngle, error, motorPower;
-	UART_PutINT(TIMER_getCounter());
-	UART_PutSTR("\n");
-	TIMER_Reset();
+	//UART_PutINT(TIMER_getCounter());
+	//UART_PutSTR("\n");
+	//TIMER_Reset();
 	/* Clear Int */
 	Chip_GPIO_ClearInts(LPC_GPIO, GPIO_PININT_PORT, (1 << GPIO_PININT));
 
 	/* Calculate the angle */
-	compute_new_angle(&currentAngle);
+	if (first == 0)  {
+		compute_new_angle(&currentAngle);
+	} else {
+		first = 0;
+		currentAngle = 0;
+	}
 
 	/* Calculate the errors */
 	error = currentAngle - targetAngle;
@@ -92,7 +98,7 @@ void PININT_IRQ_HANDLER(void)
 					+ ki * errorSum * sampleTime
 					- kd * (currentAngle - previousAngle) / sampleTime;
 
-	/*Prepare next loop */
+	/* Prepare next loop */
 	previousAngle = currentAngle;
 
 	/*

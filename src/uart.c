@@ -34,10 +34,6 @@ void Init_UART()
 	Chip_UART_IntDisable(LPC_USART, ~0);
 }
 
-void Quit_UART()
-{
-}
-
 void UART_PutCHAR(char c)
 {
 	Chip_UART_SendBlocking(LPC_USART, &c, 1);
@@ -260,12 +256,12 @@ static void analyseBuffer()
 									UART_PutPID();
 									break;
 
-						case 105: 	kd = (sign) * (sum + sum2);													//d
+						case 105: 	ki = (sign) * (sum + sum2);													//i
 									errorSum = 0;
 									UART_PutPID();
 									break;
 
-						case 100 : 	ki = (sign) * (sum + sum2);													//i
+						case 100 : 	kd = (sign) * (sum + sum2);													//d
 									errorSum = 0;
 									UART_PutPID();
 									break;
@@ -289,12 +285,12 @@ static void analyseBuffer()
 									UART_PutPID();
 									break;
 
-						case 105: 	kd += (sign) * (sum + sum2);													//d
+						case 105: 	ki += (sign) * (sum + sum2);													//i
 									errorSum = 0;
 									UART_PutPID();
 									break;
 
-						case 100 : 	ki += (sign) * (sum + sum2);													//i
+						case 100 : 	kd += (sign) * (sum + sum2);													//d
 									errorSum = 0;
 									UART_PutPID();
 									break;
