@@ -4,6 +4,8 @@
 #include <uart.h>
 #include <math.h>
 
+#define MOTOR_MAX 1600
+
 void Init_Motor()
 {
 	Init_rMotor();
@@ -28,18 +30,19 @@ void Motor_changeDir(uint8_t direction)
 	lMotor_changeDir(direction);
 }
 
-void Motor_Backward(uint8_t perPower)
+void Motor_Backward(uint16_t perPower)
 {
 	rMotor_Backward(perPower);
 	lMotor_Backward(perPower);
 }
 
-void Motor_Forward(uint8_t perPower)
+void Motor_Forward(uint16_t perPower)
 {
 	rMotor_Forward(perPower);
 	lMotor_Forward(perPower);
 }
 
+/* Deal with low value issues, for example if the wheels begin to turn after 100 = 5 V * (100/255), you might want them to turn after 50, to do that set minValue to 100 and minRunValue = 50 */
 static void deal_with_low_values(int *motorPower, int minValue, int minRunValue)
 {
 	if (*motorPower >= 0) {
@@ -56,13 +59,14 @@ static void deal_with_low_values(int *motorPower, int minValue, int minRunValue)
 void Motor_setPower(float motorPower)
 {
 	int motorPowerFloor = floor(motorPower);
-	motorPowerFloor = (motorPowerFloor <= -255) ? -255 : ((motorPowerFloor >= 255) ? 255 : motorPowerFloor);			//constrain the range
+	motorPowerFloor = (motorPowerFloor <= -MOTOR_MAX) ? -MOTOR_MAX : ((motorPowerFloor >= MOTOR_MAX) ? MOTOR_MAX : motorPowerFloor);			//constrain the range
 	//deal_with_low_values(&motorPowerFloor);
 
-	/* DEBUG */
-	/*UART_PutINT(motorPowerFloor);
-	UART_PutSTR("\r\n");*/
-
+	/*
+	UART_PutSTR("Motor : ");
+	UART_PutFLOAT((float)(motorPowerFloor*100/MOTOR_MAX),2);
+	UART_PutSTR(" %\n");
+	*/
 	if (motorPowerFloor <= 0){
 		Motor_Forward(abs(motorPowerFloor));
 	} else {

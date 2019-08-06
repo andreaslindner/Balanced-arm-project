@@ -1,7 +1,7 @@
 #ifndef LMOTOR_H_
 #define LMOTOR_H_
 
-#define PERIOD_RESET_LMOTOR 256 // Number of TIMER ticks for pwm period
+#define PERIOD_RESET_LMOTOR 1600 // Number of TIMER ticks for pwm period
 #define LFREQ_LOOP 1000			// Frequency of the loop
 
 #include <stdint.h>
@@ -9,12 +9,65 @@
 #define FORWARD 10
 #define BACKWARD 11
 
-void Init_lMotor();										// Init and configure left motor, start in forward mode
-void lMotor_Start();									// Start forward 0% (you have to run this function before moving)
-void lMotor_Stop();										// Stop lMotor
-void lMotor_changeDir(uint8_t direction);				// Change direction (backward 11 or forward 12)
-uint8_t lMotor_isForward();								// Return current direction (backward 11 or forward 10)
-void lMotor_Backward(uint8_t perPower);					// Change left wheel speed while going backward ( perPower : percent of the power we want)  (percent on 255)
-void lMotor_Forward(uint8_t perPower);					// Change left wheel speed while going forward ( perPower : percent of the power we want)  (percent on 255)
+/* ---MOTOR CONFIGURATION-- */
+
+/**
+ * @brief	Init left motor
+ * @param	Nothing
+ * @return	Nothing
+ * @note	The voltage supply is controlled by the 32-bit TIMER 1
+ */
+void Init_lMotor();
+
+/**
+ * @brief	Start left motor
+ * @param	Nothing
+ * @return	Nothing
+ * @note	Nothing
+ */
+void lMotor_Start();
+
+/**
+ * @brief	Stop left motor
+ * @param	Nothing
+ * @return	Nothing
+ * @note	Nothing
+ */
+void lMotor_Stop();
+
+/**
+ * @brief	Change the direction of left motor
+ * @param	forward : FORWARD (10) for set the direction as forward and BACKWARD (11) for backward
+ * @return	Nothing
+ * @note	Nothing
+ */
+void lMotor_changeDir(uint8_t forward);
+
+
+/* ---MOTOR MOVEMENT--- */
+
+/**
+ * @brief	Set left motor to move backward
+ * @param	perPower : percent (not really a percent because its on PERIOD_LRESET_MOTOR and not 100, PERIOD_RESET_LMOTOR = 5V) of power desired
+ * @return	Nothing
+ * @note	Nothing
+ */
+void lMotor_Backward(uint16_t perPower);
+
+/**
+ * @brief	Set left motor to move forward
+ * @param	perPower : percent (not really a percent because its on PERIOD_RESET_LMOTOR and not 100, PERIOD_RESET_LMOTOR = 5V) of power desired
+ * @return	Nothing
+ * @note	Nothing
+ */
+void lMotor_Forward(uint16_t perPower);
+
+/**
+ * @brief	check if motor is set as forward or backward
+ * @param	Nothing
+ * @return	return 1 if the motor's direction is set as forward and 0 if it is set as backward
+ * @note	Nothing
+ */
+uint8_t lMotor_isForward();
 
 #endif /* LMOTOR_H_ */

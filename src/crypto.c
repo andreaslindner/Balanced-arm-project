@@ -4,6 +4,7 @@
 #include <wolfcrypt/src/aes.c>
 #include <wolfcrypt/src/misc.c>
 
+
 void HMAC_SHA256(const byte MESSAGE[], const uint8_t sizeMESSAGE, const byte KEY[], const uint8_t sizeKEY, byte HASH[32])
 {
 	Hmac hmac;

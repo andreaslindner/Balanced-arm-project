@@ -31,7 +31,7 @@ uint16_t TIMER_getCounter()
 {
 	uint16_t a = LPC_TIMER16_1 -> TC;
 
-	Chip_TIMER_Reset(LPC_TIMER16_1);
+	//Chip_TIMER_Reset(LPC_TIMER16_1);
 	return a;
 }
 

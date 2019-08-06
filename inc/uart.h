@@ -6,13 +6,10 @@ typedef unsigned char byte;
 #endif
 
 #include <stdint.h>
-#define BAUDRATE 9600 //Baudrate
-#define TIMEOUT_ACK 10
 
-uint8_t UART_Read_max_nB(uint32_t n);								// Read UART, stop when fifo empty or when n bytes have been read
-void UART_Test_SHA256();											// Verify that SHA256 is working
-void UART_Test_HMAC_SHA256();										// Verify that HMAC-SHA256 is working
-
+#define BAUDRATE 9600 			// Baud rate for UART
+#define TIMEOUT_ACK 10			// 10 s before timeout ACK
+#define TIMEOUT_PACKET 2
 
 /*	---CONFIG UART--- */
 
@@ -51,6 +48,14 @@ void UART_PutCHAR(char c);
  */
 void UART_PutSTR(char *str);
 
+/**
+ * @brief	Send a string through UART
+ * @param	str : address of the string you want to send
+ * 			size : number of bytes you want to send
+ * @return	Nothing
+ * @note	Write is blocking (wait till the data is in the FIFO)
+ */
+void UART_PutSTR2(char *str, uint16_t size);
 /**
  * @brief	Transform an unsigned int into int string and send it
  * @param	n : unsigned int you want to send as int
@@ -109,7 +114,7 @@ uint8_t UART_Handshake(const byte KEY[32], byte DERIVATE_KEY[32]);
  * @brief	Send a message through UART respecting the crypto protocol
  * @param	message : address of the message
  * 			sizeMessage : size of the message
- * 			KEY : 32-bit key used to encrypt
+ * 			KEY : 32-byte key used to encrypt
  * 			is_ACK : must be set to 1 if the message sent is ACK and set to 0 if not.
  * @return	return 0 if it is successful, 1 if not.
  * @note	You can't send more than 14 bytes in a row for the moment, so sizeMessage should be lower or equal to 14
@@ -117,9 +122,9 @@ uint8_t UART_Handshake(const byte KEY[32], byte DERIVATE_KEY[32]);
 uint8_t UART_SendSTR_Signed(const byte *message, const uint16_t sizeMessage, const byte KEY[32], uint8_t is_ACK);
 
 /**
- * @brief	Receive a message and encrypt it
+ * @brief	Receive a message and decrypt it
  * @param	MESSAGE : address of the message
- * 			KEY : 32-bit key used to decrypt
+ * 			KEY : 32-byte key used to decrypt
  * @return	return 14 if it is successful, 0 if not.
  * @note	Nothing
  */

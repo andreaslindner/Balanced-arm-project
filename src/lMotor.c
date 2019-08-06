@@ -85,7 +85,7 @@ uint8_t lMotor_isForward()
 	return((LPC_TIMER32_1 -> PWMC) & (0x01));
 }
 
-void lMotor_Backward(uint8_t perPower)
+void lMotor_Backward(uint16_t perPower)
 {
 	if (lMotor_on) {
 		if (lMotor_isForward()) {
@@ -93,12 +93,12 @@ void lMotor_Backward(uint8_t perPower)
 		}
 		if ((0 <= perPower) && (perPower <= PERIOD_RESET_LMOTOR )) {
 			Chip_TIMER_SetMatch(LPC_TIMER32_1, 1, PERIOD_RESET_LMOTOR - perPower);
-			Chip_TIMER_Reset(LPC_TIMER32_1);
+			//Chip_TIMER_Reset(LPC_TIMER32_1);
 		}
 	}
 }
 
-void lMotor_Forward(uint8_t perPower)
+void lMotor_Forward(uint16_t perPower)
 {
 	if (lMotor_on) {
 		if (lMotor_isForward() == 0) {
@@ -106,7 +106,7 @@ void lMotor_Forward(uint8_t perPower)
 		}
 		if ((0 <= perPower) && (perPower <= PERIOD_RESET_LMOTOR )) {
 			Chip_TIMER_SetMatch(LPC_TIMER32_1, 0, PERIOD_RESET_LMOTOR - perPower);
-			Chip_TIMER_Reset(LPC_TIMER32_1);
+			//Chip_TIMER_Reset(LPC_TIMER32_1);
 		}
 	}
 }

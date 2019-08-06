@@ -1,3 +1,5 @@
+#define CRYPT
+
 #include <chip.h>
 #include <i2c.h>
 #include <imu.h>
@@ -8,7 +10,7 @@
 #include <calibrate.h>
 #include <timer.h>
 
-#define REPLAY
+
 volatile uint8_t function = 1;							//Useful for communication between IMU handler and main loop
 volatile int16_t values[7] = {0,0,0,0,0,0,0};			//Values of the IMU
 const byte MOTHER_KEY[32] = "12345678912345678912345678912345";
@@ -31,14 +33,28 @@ int main()
 	while (init_system) {
 		Chip_GPIO_Init(LPC_GPIO);			//Init chip
 		Init_UART();						//Init UART
+		//UART_PutSTR("UART done\n");
+		//UART_PutSTR("wooo\n");
+		for (volatile uint32_t k = 0; k < 1000; k++)
+		  for (volatile uint32_t l = 0; l < 1000; l++);
+		//UART_PutSTR("hoooo\n");
+		
 		Init_Motor();						//Init both motors
 		init_system = Init_IMU();			//Init IMU (and I2C in a row)
+		//if (init_system) UART_PutSTR("nooooooooo                  \n");
 		//Init_TIMER();
 		//init_system = 0;
 		
 	}
+	/*
+	Motor_Start();
+	Motor_Forward(1600);
+	while(1);
+	*/
+
 	calculate_offset(ACC_X_OFF, ACC_Z_OFF, GYRO_Y_OFF);
 	Motor_Start();
+	
 	Init_PININT();
 	//TIMER_Start();
 	while(1) {	//main loop -> reading UART

@@ -26,12 +26,6 @@ extern volatile float kd;
 extern volatile float alpha;
 extern volatile uint8_t first;
 
-/*DEBUG*/
-/*
-volatile float listAngle[500];
-volatile int i_s = 0;
-volatile int j_s = 0;
-*/
 
 void Init_PININT()
 {
@@ -54,19 +48,12 @@ void Init_PININT()
 	NVIC_EnableIRQ(PININT_NVIC_NAME);
 }
 
+/* Calculate the new angle from the values retrieved from the IMU */
 static void compute_new_angle(float *currentAngle)
 {
 	float accAngle =  (values[2] == 0) ? 0 : (atan2(values[0],values[2]) * RAD_TO_DEG);
 	float gyroSpeed = translate(values[5], -32768, 32767, -250, 250);
 	float gyroAngle = (float) gyroSpeed * sampleTime;
-
-	/*		DEBUG ANGLE
-
-	UART_PutINT((int)(previousAngle + gyroAngle));
-	UART_PutSTR(" : ");
-	UART_PutINT((int)(accAngle));
-	UART_PutSTR("\r\n");
-	*/
 
 	*currentAngle = alpha * (previousAngle + gyroAngle) + (1-alpha) * accAngle;
 }
@@ -74,10 +61,8 @@ static void compute_new_angle(float *currentAngle)
 void PININT_IRQ_HANDLER(void)
 {
 	float currentAngle, error, motorPower;
-	//UART_PutINT(TIMER_getCounter());
-	//UART_PutSTR("\n");
-	//TIMER_Reset();
-	/* Clear Int */
+
+	/* Clear GPIO Int */
 	Chip_GPIO_ClearInts(LPC_GPIO, GPIO_PININT_PORT, (1 << GPIO_PININT));
 
 	/* Calculate the angle */
@@ -101,26 +86,10 @@ void PININT_IRQ_HANDLER(void)
 	/* Prepare next loop */
 	previousAngle = currentAngle;
 
-	/*
-	if (i_s < 500) {
-		if (j_s == 5) {
-			listAngle[i_s] = currentAngle;
-			listAngle[i_s+1] = motorPower;
-			j_s = 0;
-			++i_s;
-			++i_s;
-		} else {
-			j_s++;
-		}
-	} else {
-		++i_s;
-	}
-	*/
-
 	/* Set the power of the motors */
 	Motor_setPower(motorPower);
 
-	/* Ask for read a new value of the IMU */
+	/* Ask for read a new value of the IMU, in order to clean the interrupt triggered from the IMU you need to read any register from IMU, so this call will clean the last interrupt */
 	if (read_available == 1) {
 		IMU_Read_Values();
 	} else { // read_available == 0

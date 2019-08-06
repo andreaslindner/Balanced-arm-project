@@ -7,18 +7,26 @@
 #include <crypto.h>
 #include <timer.h>
 
+/* UART_BUFFER and its counter, these variables are used in UART_Read_PID() */
+
 uint8_t UART_BUFFER_counter = 0;
 uint8_t UART_BUFFER[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
+/* Necessary if we are tuning the PID */
 
 extern volatile float kp;
 extern volatile float ki;
 extern volatile float kd;
 extern volatile float errorSum;
 extern volatile float alpha;
+
+/* Necessary if we are using crypto */
+
 extern uint16_t nounce;
 const byte ACK[14] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
+
+/*	---CONFIG UART--- */
 
 void Init_UART()
 {
@@ -33,6 +41,8 @@ void Init_UART()
 	/* Disable all interrupts */
 	Chip_UART_IntDisable(LPC_USART, ~0);
 }
+
+/* ---UART SEND FUNCTIONS--- */
 
 void UART_PutCHAR(char c)
 {
@@ -138,15 +148,10 @@ void UART_PutFLOAT(float f, int precision) {
 	UART_PutSTR(str);
 }
 
+/* ---UART READ FUNCTIONS--- */
 
-uint8_t UART_Read_max_nB(uint32_t n)
-{
-	uint32_t counter = 0;
-	char byte = 10; //10 is error (ex : no data to pull or wrong data pulled)
-	while ((counter < n) && (Chip_UART_Read(LPC_USART, &byte, 1) > 0)) {
-		counter++;
-	}
-	return byte;
+void UART_Read(uint8_t* b) {
+	Chip_UART_ReadBlocking(LPC_USART, b, 1);
 }
 
 void UART_Read_Replay()
@@ -156,7 +161,7 @@ void UART_Read_Replay()
 	UART_PutCHAR(byte);
 }
 
-
+/* clean buffer UART_BUFFER */
 static void cleanBuffer()
 {
 	uint8_t i = 0;
@@ -167,6 +172,7 @@ static void cleanBuffer()
 	UART_PutSTR("Buffer cleaned\r\n\0");
 }
 
+/* put to UART kp, kd, ki */
 static void UART_PutPID()
 {
 	UART_PutSTR(" -> Kp : \0");
@@ -180,6 +186,7 @@ static void UART_PutPID()
 	UART_PutSTR("\r\n0");
 }
 
+/* analyze the buffer UART_BUFEFR to check if it follows the protocol of UART_Read_PID() */
 static void analyseBuffer()
 {
 	float sign = 1;
@@ -251,17 +258,17 @@ static void analyseBuffer()
 				if (equal == 1) {																			//if we had an equal
 					switch (UART_BUFFER[0]) {																	//if its p,i,d or a
 
-						case 112 : 	kp = (sign) * (sum + sum2);													//p
+						case 112 : 	kp = (sign) * (sum + sum2);														//p
 									errorSum = 0;
 									UART_PutPID();
 									break;
 
-						case 105: 	ki = (sign) * (sum + sum2);													//i
+						case 105: 	ki = (sign) * (sum + sum2);														//i
 									errorSum = 0;
 									UART_PutPID();
 									break;
 
-						case 100 : 	kd = (sign) * (sum + sum2);													//d
+						case 100 : 	kd = (sign) * (sum + sum2);														//d
 									errorSum = 0;
 									UART_PutPID();
 									break;
@@ -273,7 +280,7 @@ static void analyseBuffer()
 									UART_PutSTR("\r\n");
 									break;
 
-						default  : 	break;																			//default
+						default  : 	break;																		//default
 					}
 					cleanBuffer();
 					return;
@@ -321,7 +328,8 @@ static void analyseBuffer()
 
 void UART_Read_PID()
 {
-	uint8_t byte = UART_Read_max_nB(1);
+	uint8_t byte;
+	UART_Read(&byte);
 	if (byte == 10) {
 		return;
 	}
@@ -337,102 +345,41 @@ void UART_Read_PID()
 	}
 }
 
-void UART_Test_SHA256()
-{
-	byte UART_BUFFER_SHA256[64];	//64 bytes (32 message + 32 sha256)
-	byte MESSAGE[32];
-	byte HASH[32];
-
-	uint8_t cond = 1;
-
-	uint8_t counter = 0;
-	byte byteR;
-
-	while(counter < 64) {
-		if (Chip_UART_Read(LPC_USART, &byteR, 1) > 0) {
-			UART_BUFFER_SHA256[counter] = byteR;
-			counter++;
-		}
-	}
-
-	for (counter = 0; counter < 32; ++counter) {
-		MESSAGE[counter] = UART_BUFFER_SHA256[counter];
-	}
-
-	HASH_SHA256(MESSAGE, 32, HASH);
-
-	counter = 0;
-	while ((counter < 32) && (cond == 1)) {
-		if (HASH[counter] != UART_BUFFER_SHA256[32 + counter]) {
-			cond = 0;
-		}
-		counter++;
-	}
-
-		cond == 1 ? UART_PutSTR("Success\r\n\0") : UART_PutSTR("Fail\r\n\0");
-}
-
-
-void UART_Test_HMAC_SHA256()
-{
-	byte UART_BUFFER_SHA256[64];	//64 bytes (32 message + 32 sha256)
-	byte MESSAGE[32];
-	byte HASH[32];
-	byte KEY[32] = "11111111111111111111111111111111";
-
-	uint8_t cond = 1;
-
-	uint8_t counter = 0;
-	byte byteR;
-
-	while(counter < 64) {
-		if (Chip_UART_Read(LPC_USART, &byteR, 1) > 0) {
-			UART_BUFFER_SHA256[counter] = byteR;
-			counter++;
-		}
-	}
-
-	for (counter = 0; counter < 32; ++counter) {
-		MESSAGE[counter] = UART_BUFFER_SHA256[counter];
-	}
-
-	HMAC_SHA256(MESSAGE, 32, KEY, 32, HASH);
-
-	counter = 0;
-	while ((counter < 32) && (cond == 1)) {
-		if (HASH[counter] != UART_BUFFER_SHA256[32 + counter]) {
-			cond = 0;
-		}
-		counter++;
-	}
-
-		cond == 1 ? UART_PutSTR("Success\r\n\0") : UART_PutSTR("Fail\r\n\0");
-}
-
-
-void UART_Read(uint8_t* b) {
-	Chip_UART_ReadBlocking(LPC_USART, b, 1);
-}
+/* ---UART CRYPTO FUNCTIONS--- */
 
 uint8_t UART_Handshake(const byte KEY[32], byte *DERIVATE_KEY)
 {
-	uint8_t i = 0, same_hash = 1;
+	uint8_t same_hash = 1;
+	volatile int i = 0;
 	byte byt, IV[16], MESSAGE[32], CIPHER_HASH[32], PLAIN_HASH[32], MY_HASH[32];
 
-	//We get IV(16B)|M(32B)|H(32B)
 
-	for (; i < 80; ++i){
-		UART_Read(&byt);
+	//We get IV(16B)|M(32B)|H(32B)
+	for (i = 0; i < 80; ++i) {
 		if (i < 16) {
-			IV[i] = byt;
-		} else {
-			if (i < 48) {
-				MESSAGE[i - 16] = byt;
+			if (i == 0) {
+				while(Chip_UART_Read(LPC_USART, &IV[i], 1) == 0);
+				//begin timeout packet measurement
+				Init_TIMER();
+				TIMER_Start();
 			} else {
-				CIPHER_HASH[i - 48] = byt;
+				while((TIMER_getCounter() < TIMEOUT_PACKET * PRESCALE) && (Chip_UART_Read(LPC_USART, &IV[i], 1) == 0));
+			}
+		} else {
+			if (i < 48){
+				while((TIMER_getCounter() < TIMEOUT_PACKET * PRESCALE) && (Chip_UART_Read(LPC_USART, &MESSAGE[i - 16], 1) == 0));
+			} else {
+				while((TIMER_getCounter() < TIMEOUT_PACKET * PRESCALE) && (Chip_UART_Read(LPC_USART, &CIPHER_HASH[i - 48], 1) == 0));
 			}
 		}
+		if ((TIMER_getCounter() > TIMEOUT_PACKET * PRESCALE) && (i != 79)) {
+			i = -1;
+			TIMER_Stop();
+			TIMER_DeInit();
+		}
 	}
+	TIMER_Stop();
+	TIMER_DeInit();
 
 	// We decrypt the hash using AES_256_CBC
 
@@ -478,10 +425,12 @@ uint8_t UART_Handshake(const byte KEY[32], byte *DERIVATE_KEY)
 	return 0;
 }
 
+/* Send multiple bytes through UART */
 static void UART_Send_nB(const byte *message, const uint8_t sizeMessage) {
 	Chip_UART_SendBlocking(LPC_USART, message, (int)sizeMessage);
 }
 
+/* check if one is equal to two on the size first bytes */
 static uint8_t ByteArray_Equal(const byte one[], const byte two[], uint8_t size)
 {
 	for (uint8_t i = 0; i < size; ++i) {
@@ -492,6 +441,7 @@ static uint8_t ByteArray_Equal(const byte one[], const byte two[], uint8_t size)
 	return 0;
 }
 
+/* Wait for ACK, KEY is the 32-bit key used to encrypt data */
 static uint8_t Wait_ACK(const byte KEY[32])
 {
 	uint8_t counter = 0;
@@ -594,18 +544,32 @@ uint16_t UART_ReceiveSTR_Signed(byte MESSAGE[], const byte KEY[32])
 {
 	byte HASH[32];
 	byte PLAIN_TEXT[16];
-	int8_t i;
+	volatile int i;
 	byte HASH_VERIFY[32];
 	uint16_t received_nounce;
 
 	/* receive one packet of 48 bytes */
 	for (i = 0; i < 48; ++i) {
 		if (i < 16) {
-			while(Chip_UART_Read(LPC_USART, &PLAIN_TEXT[i], 1) == 0);
+			if (i == 0) {
+				while(Chip_UART_Read(LPC_USART, &PLAIN_TEXT[i], 1) == 0);
+				//begin timeout packet measurement
+				Init_TIMER();
+				TIMER_Start();
+			} else {
+				while((TIMER_getCounter() < TIMEOUT_PACKET * PRESCALE) && (Chip_UART_Read(LPC_USART, &PLAIN_TEXT[i], 1) == 0));
+			}
 		} else {
-			while(Chip_UART_Read(LPC_USART, &HASH[i - 16], 1) == 0);
+			while((TIMER_getCounter() < TIMEOUT_PACKET * PRESCALE) && (Chip_UART_Read(LPC_USART, &HASH[i - 16], 1) == 0));
+		}
+		if ((TIMER_getCounter() > TIMEOUT_PACKET * PRESCALE) && (i != 47)) {
+			i = -1;
+			TIMER_Stop();
+			TIMER_DeInit();
 		}
 	}
+	TIMER_Stop();
+	TIMER_DeInit();
 
 	/* analyze the packet */
 
