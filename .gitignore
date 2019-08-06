@@ -4,3 +4,4 @@ Debug
 *.launch
 .settings
 .metadata
+Release
