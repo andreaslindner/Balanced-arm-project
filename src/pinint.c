@@ -18,7 +18,7 @@ extern volatile uint8_t read_available;
 const float sampleTime = 0.005;
 volatile float previousAngle = 0;
 volatile float errorSum = 0;
-float targetAngle = -1;
+float targetAngle = -10;
 
 extern volatile float kp;
 extern volatile float ki;
@@ -76,7 +76,7 @@ void PININT_IRQ_HANDLER(void)
 	/* Calculate the errors */
 	error = currentAngle - targetAngle;
 	errorSum += error;
-	errorSum = errorSum <= -300 ? -300 : (errorSum >= 300 ? 300 : errorSum);			// constrain errorSum to be between -300 and 300
+	errorSum = errorSum <= -1000 ? -1000 : (errorSum >= 1000 ? 1000 : errorSum);			// constrain errorSum to be between -300 and 300
 
 	/* Calculate the output from PID algorithm */
 	motorPower =	  kp * error

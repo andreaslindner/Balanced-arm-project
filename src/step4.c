@@ -15,9 +15,9 @@ volatile uint8_t function = 1;							//Useful for communication between IMU hand
 volatile int16_t values[7] = {0,0,0,0,0,0,0};			//Values of the IMU
 const byte MOTHER_KEY[32] = "12345678912345678912345678912345";
 
-volatile float kp = 17;
+volatile float kp = 50; //425
 volatile float ki = 0;
-volatile float kd = 0;
+volatile float kd = 0; //20
 volatile float alpha = 0.9;
 volatile uint8_t first = 1;
 
@@ -53,7 +53,6 @@ int main()
 
 	calculate_offset(ACC_X_OFF, ACC_Z_OFF, GYRO_Y_OFF);
 	Motors_Start();
-	
 	Init_PININT();
 	while(1) {	//main loop -> reading UART
 		

@@ -27,7 +27,7 @@ float translate(int16_t value, int lastMinValue, int lastMaxValue, int newMinVal
 	int newRange = newMaxValue - newMinValue;
 
 	if (lastRange != 0) {
-		return((float)((value * newRange) / lastRange));
+		return((float)((value * newRange) / ((float)lastRange)));
 	} else {
 		return(0);
 	}

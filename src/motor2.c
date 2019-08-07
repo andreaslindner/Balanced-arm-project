@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <math.h>
 #include <stdlib.h>
+#include <uart.h>
 
 volatile uint8_t motors_on = 0;
 
@@ -208,10 +209,35 @@ void Motors_Start()
 	Motors_Forward(0);
 }
 
+/* Deal with low value issues, for example if the wheels begin to turn after 100 = 5 V * (100/255), you might want them to turn after 50, to do that set minValue to 100 and minRunValue = 50 */
+static void deal_with_low_values(int *motorPower, int minValue, int minRunValue)
+{
+	if (*motorPower >= 0) {
+		if ((*motorPower >= minRunValue) && (*motorPower <= minValue)) {
+			*motorPower = minValue;
+		}
+	} else {
+		if ((*motorPower <= -minRunValue) && (*motorPower >= -minValue)) {
+			*motorPower = -minValue;
+		}
+	}
+}
+
+
 void Motors_Move(float powerFloat)
 {
+	if (powerFloat < -100) {
+		powerFloat = powerFloat - 300;
+	} else if (powerFloat > 100) {
+		powerFloat = powerFloat + 300;
+	} else {
+		powerFloat = 0;
+	}
+
 	int motorPowerFloor = floor(powerFloat);
 	motorPowerFloor = (motorPowerFloor <= -MOTORS_PERIOD_RESET) ? -MOTORS_PERIOD_RESET : ((motorPowerFloor >= MOTORS_PERIOD_RESET) ? MOTORS_PERIOD_RESET : motorPowerFloor);			//constrain the range
+	//deal_with_low_values(&motorPowerFloor, 400, 200);
+
 	if (motorPowerFloor <= 0){
 		Motors_Forward(abs(motorPowerFloor));
 	} else {
