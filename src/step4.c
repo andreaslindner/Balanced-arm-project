@@ -1,4 +1,4 @@
-#define CRYPT
+#define REPLAY
 
 #include <chip.h>
 #include <i2c.h>
@@ -6,7 +6,7 @@
 #include <pinint.h>
 #include <uart.h>
 #include <fonction.h>
-#include <motor.h>
+#include <motor2.h>
 #include <calibrate.h>
 #include <timer.h>
 
@@ -39,24 +39,22 @@ int main()
 		  for (volatile uint32_t l = 0; l < 1000; l++);
 		//UART_PutSTR("hoooo\n");
 		
-		Init_Motor();						//Init both motors
+		Init_Motors();						//Init both motors
 		init_system = Init_IMU();			//Init IMU (and I2C in a row)
 		//if (init_system) UART_PutSTR("nooooooooo                  \n");
 		//Init_TIMER();
 		//init_system = 0;
 		
 	}
-	/*
-	Motor_Start();
-	Motor_Forward(1600);
-	while(1);
-	*/
+	
+	//Motors_Start();
+	//Motors_Forward(1500);
+	//while(1);
 
 	calculate_offset(ACC_X_OFF, ACC_Z_OFF, GYRO_Y_OFF);
-	Motor_Start();
+	Motors_Start();
 	
 	Init_PININT();
-	//TIMER_Start();
 	while(1) {	//main loop -> reading UART
 		
 		#ifdef CRYPT

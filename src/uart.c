@@ -19,6 +19,7 @@ extern volatile float ki;
 extern volatile float kd;
 extern volatile float errorSum;
 extern volatile float alpha;
+extern float targetAngle;
 
 /* Necessary if we are using crypto */
 
@@ -273,10 +274,10 @@ static void analyseBuffer()
 									UART_PutPID();
 									break;
 
-						case 97  : 	alpha = (sign) * (sum + sum2);													//a
+						case 97  : 	targetAngle = (sign) * (sum + sum2);													//a
 									errorSum = 0;
-									UART_PutSTR(" -> alpha = ");
-									UART_PutFLOAT(alpha, 6);
+									UART_PutSTR(" -> targetAngle = ");
+									UART_PutFLOAT(targetAngle, 2);
 									UART_PutSTR("\r\n");
 									break;
 
@@ -302,10 +303,10 @@ static void analyseBuffer()
 									UART_PutPID();
 									break;
 
-						case 97  : 	alpha += (sign) * (sum + sum2);													//a
+						case 97  : 	targetAngle += (sign) * (sum + sum2);													//a
 									errorSum = 0;
-									UART_PutSTR(" -> alpha = ");
-									UART_PutFLOAT(alpha, 6);
+									UART_PutSTR(" -> targetAngle = ");
+									UART_PutFLOAT(targetAngle, 2);
 									UART_PutSTR("\r\n");
 									break;
 

@@ -6,7 +6,7 @@
 #include <imu.h>
 #include <fonction.h>
 #include <math.h>
-#include <motor.h>
+#include <motor2.h>
 #include <timer.h>
 
 extern const uint8_t imu_address;
@@ -18,7 +18,7 @@ extern volatile uint8_t read_available;
 const float sampleTime = 0.005;
 volatile float previousAngle = 0;
 volatile float errorSum = 0;
-const float targetAngle = -1;
+float targetAngle = -1;
 
 extern volatile float kp;
 extern volatile float ki;
@@ -87,7 +87,7 @@ void PININT_IRQ_HANDLER(void)
 	previousAngle = currentAngle;
 
 	/* Set the power of the motors */
-	Motor_setPower(motorPower);
+	Motors_Move(motorPower);
 
 	/* Ask for read a new value of the IMU, in order to clean the interrupt triggered from the IMU you need to read any register from IMU, so this call will clean the last interrupt */
 	if (read_available == 1) {
