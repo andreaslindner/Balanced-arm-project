@@ -55,4 +55,13 @@ To configure your project as I did, you can right click on your project -> Prope
 ## Potential issues
 
 1. [x] The prescale of the TIMERs acts directly to the motor performance. For example if I set a prescale of : 1 tick of the TIMER is 0.01 ms, with a loop size of 100 ticks -> a motor set to 1% power won't turn. But if I do the same thing with a prescale of : 1 tick is 1 ms, the wheel turns. So it could be interesting to see what prescale we choose : high prescale allows a better range for the motor power but the movement is more jerked.  
-&rarr; Solution : 1600 timer ticks in 1 ms seems to be enough smooth.  
+&rarr; Solution : 1600 timer ticks in 1 ms seems to be enough smooth. 
+
+## Useful links
+
+Tutorial we followed in a first time in order to balance the robot : https://www.instructables.com/id/Arduino-Self-Balancing-Robot-1/
+Tutorial for connecting the bluetooth modules (HC-05 on the computer side and HC-06 on the robot) : http://www.martyncurrey.com/connecting-2-arduinos-by-bluetooth-using-a-hc-05-and-a-hc-06-pair-bind-and-link/
+
+## Datasheets
+
+You can find datasheets of the board and of the IMU in the doc folder.
