@@ -59,7 +59,7 @@ To configure your project as I did, you can right click on your project -> Prope
 
 ## Useful links
 
-Tutorial we followed in a first time in order to balance the robot : https://www.instructables.com/id/Arduino-Self-Balancing-Robot-1/
+Tutorial we followed in a first time in order to balance the robot : https://www.instructables.com/id/Arduino-Self-Balancing-Robot-1/  
 Tutorial for connecting the bluetooth modules (HC-05 on the computer side and HC-06 on the robot) : http://www.martyncurrey.com/connecting-2-arduinos-by-bluetooth-using-a-hc-05-and-a-hc-06-pair-bind-and-link/
 
 ## Datasheets
