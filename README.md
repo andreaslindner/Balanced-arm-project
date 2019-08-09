@@ -1,7 +1,7 @@
 # Project Board LCP11C24
 
 ## Program design
-![program activity](final_architecture.jpg)
+![program activity](images/final_architecture.jpg)
 
 ## Control loop
 
@@ -11,7 +11,7 @@ it takes the values measured by the IMU, calculate from them two different measu
 ## I2C protocol
 
 This is the protocol for reading data through i2c bus :
-![program activity](i2c_protocol.jpg)
+![program activity](images/i2c_protocol.jpg)
 
 ## Critical loop
 
