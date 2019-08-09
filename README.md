@@ -1,7 +1,7 @@
 # Project Board LCP11C24
 
 ## Program design
-![program activity](final_architecture.png)
+![program activity](final_architecture.jpg)
 
 ## Control loop
 
