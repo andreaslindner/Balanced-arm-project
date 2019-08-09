@@ -1,22 +1,19 @@
 # Project Board LCP11C24
 
 ## Program design
-![program activity](architecture.png)
+![program activity](final_architecture.png)
 
-## Bugs
+## Control loop
 
-1. [x] Sometimes the program doesn't succeed in initalizing the IMU, problem for write into the IMU, the i2c bus stays on the state I2C_BUSY ( solution may be to create a non blocking write function dealing with time out issue)  
-&rarr; Solution : I wrote blocking I2C write function, now we deal with timeout issue.
-2. [x] In order to clean the interrupt triggered by the IMU, we need to clear gpio interrupt and to clear the interrupt register of the IMU. Clearing the gpio interrupt is not a problem but to clear the IMU interrupt register we need to read any register of the IMU. This might become an issue if we ask for reading IMU while we still didn't finish reading it from the last time (a situation like we're receiving the values and we won't ask for any more register to read), the IMU interrupt register won't be cleared, and IMU won't be anymore able to trigger the interrupt. Consequences : IMU handler won't be executed again and the control loop won't execute anymore.  
-&rarr; Solution : I re-wrote the I2C Handler and PININT Handler (IMU interrupt), now if we ask for reading while I2C is still reading from the last ask, a global variable will be set to 1 and at the end of the current I2C read a new read will be started.
-3. [x] Sometimes, the IMU doesn't want to init, we don't succeed in writing to imu registers (write always timeout).  
-&rarr; Solution : While loop, we authorize 2 timeout and then we re-init all the components.
+Responsible of the balancing of the robot, you can find the source code in the interrupt_handler of the IMU in the file src/pinnint.c :
+it takes the values measured by the IMU, calculate from them two different measurements of the current tilt angle of the robot (the angle given by the accelerometer of the IMU, the angle given by the gyrometer), use a complementary filter to combine both of them into a single measure of the angle. From this angle, we use PID controller to determine the power we should give to the motors to balance the robot. At the end of each loop (which is not really a loop, but as it's executed periodically we call this a loop), a new read of the IMU (MPU-6050) values is started (this read is then performed by the I2C interrupt handler which is less prioritary then the IMU interrupt handler).
 
+## I2C protocol
+![program activity](i2c_protocol.jpg)
 
-## Potential issues
+## Critical loop
 
-1. [x] The prescale of the TIMERs acts directly to the motor performance. For example if I set a prescale of : 1 tick of the TIMER is 0.01 ms, with a loop size of 100 ticks -> a motor set to 1% power won't turn. But if I do the same thing with a prescale of : 1 tick is 1 ms, the wheel turns. So it could be interesting to see what prescale we choose : high prescale allows a better range for the motor power but the movement is more jerked.  
-&rarr; Solution : 1600 timer ticks in 1 ms seems to be enough smooth.  
+What we call critical loop is the instructions responsible of enable the secure communication between the robot and the control system (which is the computer in most cases I guess). This critical loop is executed in the main loop of the program and therefore is executed if the i2c interrupt or the IMU_interrupt are not triggered. 
 
 ## Files and folders
 
@@ -41,3 +38,19 @@ This program use the libraries pthread (you can link it in the Makefile by putti
 ### Robot program
 
 To configure your project as I did, you can right click on your project -> Properties -> C/C++ Build -> Settings -> Includes and set the paths : inc/, wolfssl/ (wherever it is on your computer, you can download the library on wolfssl website, configuration of the library is done in the file inc/wolfssl_user_setting.h), lpc_chip_cxx_lib/inc/ (which you can find on LPCXpresso website on the LPC11C24 page) and CMSIS_CORE_LPC11xx/inc (that is included in this github repository)
+
+
+## Bugs
+
+1. [x] Sometimes the program doesn't succeed in initalizing the IMU, problem for write into the IMU, the i2c bus stays on the state I2C_BUSY ( solution may be to create a non blocking write function dealing with time out issue)  
+&rarr; Solution : I wrote blocking I2C write function, now we deal with timeout issue.
+2. [x] In order to clean the interrupt triggered by the IMU, we need to clear gpio interrupt and to clear the interrupt register of the IMU. Clearing the gpio interrupt is not a problem but to clear the IMU interrupt register we need to read any register of the IMU. This might become an issue if we ask for reading IMU while we still didn't finish reading it from the last time (a situation like we're receiving the values and we won't ask for any more register to read), the IMU interrupt register won't be cleared, and IMU won't be anymore able to trigger the interrupt. Consequences : IMU handler won't be executed again and the control loop won't execute anymore.  
+&rarr; Solution : I re-wrote the I2C Handler and PININT Handler (IMU interrupt), now if we ask for reading while I2C is still reading from the last ask, a global variable will be set to 1 and at the end of the current I2C read a new read will be started.
+3. [x] Sometimes, the IMU doesn't want to init, we don't succeed in writing to imu registers (write always timeout).  
+&rarr; Solution : While loop, we authorize 2 timeout and then we re-init all the components.
+
+
+## Potential issues
+
+1. [x] The prescale of the TIMERs acts directly to the motor performance. For example if I set a prescale of : 1 tick of the TIMER is 0.01 ms, with a loop size of 100 ticks -> a motor set to 1% power won't turn. But if I do the same thing with a prescale of : 1 tick is 1 ms, the wheel turns. So it could be interesting to see what prescale we choose : high prescale allows a better range for the motor power but the movement is more jerked.  
+&rarr; Solution : 1600 timer ticks in 1 ms seems to be enough smooth.  

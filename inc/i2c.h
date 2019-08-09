@@ -48,13 +48,69 @@
 #define I2SCLH_HS_SCLH		0x00000015  /* Fast Plus I2C SCL Duty Cycle High Reg */
 #define I2SCLL_HS_SCLL		0x00000015  /* Fast Plus I2C SCL Duty Cycle Low Reg */
 
-extern void I2C_IRQHandler( void );													// Handler for i2c interrupt
-extern uint32_t I2CInit( uint32_t I2cMode );										// Init i2c bus
+/**
+ * @brief	Init and configure I2C bus
+ * @param	Nothing
+ * @return	Nothing
+ * @note	Nothing
+ */
+extern uint32_t I2CInit( uint32_t I2cMode );
 
-void I2C_Read_Blocking(uint8_t dev_id, uint8_t reg, int n);							// Read n bytes from the address reg of the device (dev_id), blocking reading (not dealing with timeout issue)
-void I2C_Read_nBlocking(uint8_t dev_id, uint8_t reg, int n);						// Read n bytes from the address reg of the device (dev_id), not blocking reading
-uint8_t I2C_Write_Blocking(uint8_t dev_id, uint8_t reg, uint8_t* ba, int n);		// Write n bytes from the address reg of the device (dev_id), blocking writing
-uint8_t I2C_Write_Blocking_1B(uint8_t dev_id, uint8_t reg, uint8_t b);				// Write 1 byte to the address reg of the device (dev_id), blocking writing
-void I2CDriver();																	// Deals with I2C communication protocol
+/**
+ * @brief	Read numerous bytes from a given address register of a device connected to the bus
+ * @param	dev_id : address of the slave device
+ * 			reg : address of the register
+ * 			n : number of bytes to read from the given address register
+ * @return	Nothing
+ * @note	Blocking read
+ */
+void I2C_Read_Blocking(uint8_t dev_id, uint8_t reg, int n);
 
+/**
+ * @brief	Read numerous bytes from a given address register of a device connected to the bus
+ * @param	dev_id : address of the slave device
+ * 			reg : address of the register
+ * 			n : number of bytes to read from the given address register
+ * @return	Nothing
+ * @note	Not blocking read
+ */
+void I2C_Read_nBlocking(uint8_t dev_id, uint8_t reg, int n);
+
+/**
+ * @brief	Write numerous bytes into a given address register of a device connected to the bus
+ * @param	dev_id : address of the slave device
+ * 			reg : address of the register
+ * 			n : number of bytes to write from the given address register
+ * 			ba : byte address of the byte which will be written into the register (it's uint8_t so this has to be modified if you want to write numerous bytes)
+ * @return	Nothing
+ * @note	Blocking write
+ */
+uint8_t I2C_Write_Blocking(uint8_t dev_id, uint8_t reg, uint8_t* ba, int n);
+
+/**
+ * @brief	Write numerous bytes into a given address register of a device connected to the bus
+ * @param	dev_id : address of the slave device
+ * 			reg : address of the register
+ * 			n : number of bytes to write from the given address register
+ * 			ba : byte address of the byte which will be written into the register
+ * @return	Nothing
+ * @note	Blocking write
+ */
+uint8_t I2C_Write_Blocking_1B(uint8_t dev_id, uint8_t reg, uint8_t b);
+
+/**
+ * @brief	Deal with I2C protocol for one answer
+ * @param	Nothing
+ * @return	Nothing
+ * @note	Nothing
+ */
+void I2CDriver();
+
+/**
+ * @brief	Handler of the i2c interrupt which is triggered each time a slave write to us
+ * @param	Nothing
+ * @return	Nothing
+ * @note	Nothing
+ */
+extern void I2C_IRQHandler( void );
 #endif

@@ -2,17 +2,26 @@
 #define IMU_H_
 
 
-void IMU_Read_Values();				// Read the values of IMU acc
-void PININT_IRQ_HANDLER(void);		// Handler for interrupt from IMU
 
 /* ---IMU CONFIGURATION--- */
 
 /**
- * @brief	Init the IMU
+ * @brief	Init the IMU, configure it (interrupt configuration is done in Init_PININT()
  * @param	Nothing
  * @return	Nothing
- * @note	Nothing
+ * @note	See the source code for more details about the configuration
  */
 uint8_t Init_IMU();
+
+
+/* ---IMU READ--- */
+
+/**
+ * @brief	Init a read of the values measured by the IMU
+ * @param	Nothing
+ * @return	Nothing
+ * @note	Not blocking read
+ */
+void IMU_Read_Values();
 
 #endif
