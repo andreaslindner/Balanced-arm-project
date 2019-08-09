@@ -9,6 +9,8 @@ Responsible of the balancing of the robot, you can find the source code in the i
 it takes the values measured by the IMU, calculate from them two different measurements of the current tilt angle of the robot (the angle given by the accelerometer of the IMU, the angle given by the gyrometer), use a complementary filter to combine both of them into a single measure of the angle. From this angle, we use PID controller to determine the power we should give to the motors to balance the robot. At the end of each loop (which is not really a loop, but as it's executed periodically we call this a loop), a new read of the IMU (MPU-6050) values is started (this read is then performed by the I2C interrupt handler which is less prioritary then the IMU interrupt handler).
 
 ## I2C protocol
+
+This is the protocol for reading data through i2c bus :
 ![program activity](i2c_protocol.jpg)
 
 ## Critical loop
